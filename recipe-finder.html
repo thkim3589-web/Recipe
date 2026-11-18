@@ -705,7 +705,7 @@ async function ytSearch(q){
     err.noKey = true;
     throw err;
   }
-  const searchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(q+' 레시피 만들기')}&order=viewCount&type=video&maxResults=6&key=${key}`;
+  const searchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(q+' 레시피 만들기')}&order=viewCount&type=video&maxResults=15&relevanceLanguage=ko&key=${key}`;
   const searchRes = await fetch(searchUrl);
   const searchData = await searchRes.json();
   if(searchData.error) throw new Error(searchData.error.message || 'API 오류');
@@ -718,9 +718,19 @@ async function ytSearch(q){
   if(statsData.error) throw new Error(statsData.error.message || 'API 오류');
   if(!statsData.items || !statsData.items.length) return null;
 
-  return statsData.items.reduce((top, cur) =>
-    (parseInt(cur.statistics.viewCount||0,10) > parseInt(top.statistics.viewCount||0,10)) ? cur : top
-  );
+  // 먹방·ASMR 등 레시피가 아닌 영상은 빼고, 설명란에 레시피가 있는 영상을 우선
+  const NOT_RECIPE = /먹방|mukbang|asmr|eating\s?show|리액션|reaction|브이로그|vlog|챌린지|challenge|쇼츠|#shorts/i;
+  const views = v => parseInt(v.statistics.viewCount || 0, 10);
+  const scored = statsData.items
+    .filter(v => !NOT_RECIPE.test(v.snippet.title + ' ' + (v.snippet.tags || []).join(' ')))
+    .map(v => {
+      const r = extractRuleBased(v.snippet.description || '', '');
+      v._hasRecipe = r.ingredients.length >= 3;
+      return v;
+    });
+  const list = scored.length ? scored : statsData.items;
+  list.sort((a, b) => (b._hasRecipe - a._hasRecipe) || (views(b) - views(a)));
+  return list.slice(0, 6);
 }
 
 function runSearch(q){
@@ -738,14 +748,14 @@ function runSearch(q){
     stepEl.textContent = loadingSteps[i];
   }, 600);
 
-  ytSearch(q).then(video=>{
+  ytSearch(q).then(list=>{
     clearInterval(iv);
     loading.classList.remove('show');
-    if(!video){
+    if(!list || !list.length){
       showEmpty(`‘${q}’에 대한 영상을 찾지 못했어요. 다른 검색어로 시도해보세요.`);
       return;
     }
-    renderVideo(q, video);
+    renderVideo(q, list[0], list);
   }).catch(err=>{
     clearInterval(iv);
     loading.classList.remove('show');
@@ -769,7 +779,7 @@ const SAVED_KEY = 'saved_recipes_v1';
 function getSavedMap(){ return JSON.parse(localStorage.getItem(SAVED_KEY) || '{}'); }
 function setSavedMap(map){ localStorage.setItem(SAVED_KEY, JSON.stringify(map)); }
 
-function renderVideo(q, video){
+function renderVideo(q, video, candidates){
   const resultEl = document.getElementById('result');
   const thumb = video.snippet.thumbnails.medium?.url || video.snippet.thumbnails.default.url;
   const views = fmtViews(video.statistics.viewCount);
@@ -780,11 +790,23 @@ function renderVideo(q, video){
     <a class="video-ref" href="https://www.youtube.com/watch?v=${video.id}" target="_blank" rel="noopener" style="text-decoration:none;color:inherit;">
       <div class="thumb" style="background-image:url('${thumb}');background-size:cover;background-position:center;"></div>
       <div class="video-meta">
-        <span class="badge-top">조회수 1위 영상</span>
+        <span class="badge-top">${candidates ? (candidates[0] === video ? (video._hasRecipe ? '레시피 있는 영상 중 조회수 1위' : '조회수 1위 레시피 영상') : '선택한 영상') : '저장한 영상'}</span>
         <div class="vt">${escapeHtml(video.snippet.title)}</div>
         <div class="vm">${escapeHtml(video.snippet.channelTitle)} · 조회수 ${views}회</div>
       </div>
     </a>
+    ${candidates && candidates.length > 1 ? `
+    <details style="margin-top:8px;background:var(--card);border:1px solid var(--line);padding:10px 12px;">
+      <summary style="cursor:pointer;font-size:13px;color:var(--ink);">다른 레시피 영상 보기 (${candidates.length - 1}개)</summary>
+      ${candidates.filter(c => c !== video).map(c => `
+        <div class="alt-video" data-id="${c.id}" style="display:flex;gap:10px;align-items:center;padding:8px 0;border-top:1px solid var(--line);cursor:pointer;">
+          <div style="width:64px;height:46px;flex:none;border-radius:3px;background:url('${c.snippet.thumbnails.medium?.url || c.snippet.thumbnails.default.url}') center/cover;"></div>
+          <div style="min-width:0;">
+            <div style="font-size:12.5px;font-weight:600;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${escapeHtml(c.snippet.title)}</div>
+            <div style="font-size:11.5px;color:var(--ink-muted);margin-top:2px;">${escapeHtml(c.snippet.channelTitle)} · ${fmtViews(c.statistics.viewCount)}회${c._hasRecipe ? ' · <b style="color:var(--green)">설명란 레시피 있음</b>' : ''}</div>
+          </div>
+        </div>`).join('')}
+    </details>` : ''}
 
     <h2 class="dish-name">${escapeHtml(q)}</h2>
     <p class="dish-tagline">자동 정리를 누르면 영상 설명과 자막에서 재료와 조리 순서를 뽑아드려요.</p>
@@ -822,6 +844,13 @@ function renderVideo(q, video){
     <div class="disclaimer">※ 영상 정보(제목·채널·조회수)는 유튜브 데이터 API에서 실시간으로 가져와요. 자동 정리 결과는 영상 설명·자막을 자동으로 정리한 것이라 틀릴 수 있으니, 저장 전에 한 번 확인하고 고쳐주세요.</div>
   `;
   resultEl.classList.add('show');
+
+  document.querySelectorAll('.alt-video').forEach(el => {
+    el.onclick = () => {
+      const v = candidates.find(c => c.id === el.dataset.id);
+      if(v){ renderVideo(q, v, candidates); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+    };
+  });
 
   const description = video.snippet.description || '';
   let currentTips = saved ? (saved.tips || '') : '';
