@@ -417,7 +417,7 @@
   @keyframes blink{to{opacity:.6;}}
   #cookIng{display:none;background:var(--card);border-top:1px solid var(--line);padding:12px 18px;max-height:40vh;overflow:auto;font-size:15px;line-height:1.8;}
   #cookIng.show{display:block;}
-  .toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:var(--ink);color:var(--card);padding:10px 16px;border-radius:20px;font-size:13px;z-index:80;opacity:0;transition:opacity .2s;pointer-events:none;max-width:90%;text-align:center;}
+  .toast{position:fixed;left:50%;top:70px;transform:translateX(-50%);background:var(--ink);color:var(--card);padding:10px 16px;border-radius:20px;font-size:13px;z-index:80;opacity:0;transition:opacity .2s;pointer-events:none;max-width:90%;text-align:center;}
   .toast.show{opacity:1;}
 </style>
 </head>
@@ -1024,7 +1024,11 @@ function renderDetail(r, opts){
   el.classList.add('show');
 
   const ingEl = $('ingInput'), stepEl = $('stepInput');
-  const updState = () => { $('saveState').textContent = isSaved ? '✓ 저장한 레시피예요. 고친 뒤 저장을 누르면 반영돼요.' : '아직 저장 전이에요.'; $('delBtn').style.display = isSaved ? '' : 'none'; };
+  const updState = () => {
+    const empty = !lines(ingEl.value).length && !lines(stepEl.value).length;
+    $('saveState').innerHTML = isSaved ? (empty ? '<span style="color:var(--accent)">⚠ 영상만 저장됐고 재료·조리 순서는 비어 있어요.</span>' : '✓ 저장한 레시피예요. 고친 뒤 저장을 누르면 반영돼요.') : '아직 저장 전이에요.';
+    $('delBtn').style.display = isSaved ? '' : 'none';
+  };
   updState();
 
   function collect(){
@@ -1056,8 +1060,15 @@ function renderDetail(r, opts){
   $('servPlus').onclick = () => { if(target < 50){ target++; renderScaled(); } };
   $('baseServ').oninput = renderScaled;
   ingEl.oninput = renderScaled;
-  $('cookBtn').onclick = () => { collect(); if(!lines(r.steps).length){ toast('조리 순서가 비어 있어요'); return; } openCook(r, factor()); };
-  $('shopBtn').onclick = () => { collect(); if(!lines(r.ing).length){ toast('재료가 비어 있어요'); return; } const n = addToShopping(r, factor()); toast(`재료 ${n}개를 장보기에 담았어요 (${target}인분)`); };
+  function needData(what){
+    const msg = $('autoMsg');
+    msg.style.display = 'block'; msg.style.color = 'var(--accent)';
+    msg.textContent = `${what} 아직 비어 있어서 실행할 수 없어요. ✨ 자동 정리를 누르거나, 아래 칸에 직접 적고 저장해주세요. (설명란에 레시피가 없는 영상이면 자막을 붙여넣거나 다른 영상을 골라보세요)`;
+    $('autoBtn').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    toast(`${what} 비어 있어요`);
+  }
+  $('cookBtn').onclick = () => { collect(); if(!lines(r.steps).length){ needData('조리 순서가'); return; } openCook(r, factor()); };
+  $('shopBtn').onclick = () => { collect(); if(!lines(r.ing).length){ needData('재료가'); return; } const n = addToShopping(r, factor()); toast(`재료 ${n}개를 장보기에 담았어요 (${target}인분)`); };
   $('saveBtn').onclick = () => save(false);
   $('delBtn').onclick = () => {
     if(!confirm('이 레시피를 삭제할까요?')) return;
@@ -1102,7 +1113,7 @@ function renderDetail(r, opts){
     }
   }
   renderScaled();
-  if(opts.autoRun) runAuto(true);
+  if(opts.autoRun || (!lines(r.ing).length && !lines(r.steps).length)) runAuto(true);
 }
 
 // ---- 저장한 레시피 (+ 냉장고 재료로 찾기, 장보기 선택) ----
