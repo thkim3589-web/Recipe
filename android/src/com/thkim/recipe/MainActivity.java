@@ -7,6 +7,9 @@ import android.content.pm.PackageInfo;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.view.WindowManager;
+import android.webkit.JavascriptInterface;
+import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
@@ -19,6 +22,7 @@ import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
@@ -33,6 +37,58 @@ public class MainActivity extends Activity {
 
     WebView web;
     boolean usedFallback = false;
+    static final int REQ_SAVE = 101, REQ_PICK = 102;
+    String pendingSave = null;
+    ValueCallback<Uri[]> fileCallback = null;
+
+    // 웹 화면에서 부르는 기능 (백업 파일 저장, 요리 모드 화면 켜짐 유지)
+    class Bridge {
+        @JavascriptInterface
+        public void saveFile(final String name, final String content) {
+            runOnUiThread(new Runnable() { public void run() {
+                pendingSave = content;
+                Intent i = new Intent(Intent.ACTION_CREATE_DOCUMENT);
+                i.addCategory(Intent.CATEGORY_OPENABLE);
+                i.setType("application/json");
+                i.putExtra(Intent.EXTRA_TITLE, name);
+                try { startActivityForResult(i, REQ_SAVE); } catch (Exception e) { notifySaved(false); }
+            }});
+        }
+        @JavascriptInterface
+        public void keepScreenOn(final boolean on) {
+            runOnUiThread(new Runnable() { public void run() {
+                if (on) getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                else getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+            }});
+        }
+    }
+
+    void notifySaved(boolean ok) {
+        web.evaluateJavascript("window.onAndroidSaved && window.onAndroidSaved(" + ok + ")", null);
+    }
+
+    @Override
+    protected void onActivityResult(int req, int res, Intent data) {
+        super.onActivityResult(req, res, data);
+        if (req == REQ_SAVE) {
+            boolean ok = false;
+            if (res == RESULT_OK && data != null && data.getData() != null && pendingSave != null) {
+                try {
+                    OutputStream os = getContentResolver().openOutputStream(data.getData(), "wt");
+                    os.write(pendingSave.getBytes("UTF-8"));
+                    os.close();
+                    ok = true;
+                } catch (Exception ignored) {}
+            }
+            pendingSave = null;
+            notifySaved(ok);
+        } else if (req == REQ_PICK) {
+            if (fileCallback != null) {
+                fileCallback.onReceiveValue(WebChromeClient.FileChooserParams.parseResult(res, data));
+                fileCallback = null;
+            }
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,7 +105,21 @@ public class MainActivity extends Activity {
         s.setSupportMultipleWindows(false);
         s.setCacheMode(WebSettings.LOAD_DEFAULT);
 
-        web.setWebChromeClient(new WebChromeClient()); // confirm/alert 창 표시
+        web.addJavascriptInterface(new Bridge(), "AndroidBridge");
+        web.setWebChromeClient(new WebChromeClient() { // confirm/alert 창 + 파일 선택(백업 불러오기)
+            @Override
+            public boolean onShowFileChooser(WebView v, ValueCallback<Uri[]> cb, FileChooserParams params) {
+                if (fileCallback != null) fileCallback.onReceiveValue(null);
+                fileCallback = cb;
+                try {
+                    Intent i = new Intent(Intent.ACTION_GET_CONTENT);
+                    i.addCategory(Intent.CATEGORY_OPENABLE);
+                    i.setType("*/*");
+                    startActivityForResult(Intent.createChooser(i, "백업 파일 선택"), REQ_PICK);
+                } catch (Exception e) { fileCallback = null; return false; }
+                return true;
+            }
+        });
         web.setWebViewClient(new WebViewClient() {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest req) {

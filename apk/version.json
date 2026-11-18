@@ -1,6 +1,6 @@
 {
-  "versionCode": 1,
-  "versionName": "1.0",
+  "versionCode": 2,
+  "versionName": "1.1",
   "apkUrl": "https://github.com/thkim3589-web/Recipe/raw/main/apk/recipe.apk",
-  "notes": "첫 버전"
+  "notes": "· 백업 파일 저장·불러오기 지원\n· 요리 모드에서 화면이 꺼지지 않게 유지"
 }

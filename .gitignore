@@ -1,3 +1,4 @@
 android/build/
 android/assets/
 *.jks
+*.idsig

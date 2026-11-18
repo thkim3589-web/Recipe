@@ -357,6 +357,68 @@
   }
   footer.tab .t.on{color:var(--accent); font-weight:600;}
   footer.tab .t .ic{display:block; font-size:17px; margin-bottom:2px; font-family:'Song Myung',serif;}
+
+  /* ---- v2 추가 스타일 ---- */
+  .btn{border:1px solid var(--line);background:var(--card);color:var(--ink);padding:10px 12px;border-radius:2px;font-size:13.5px;cursor:pointer;font-family:'Noto Sans KR',sans-serif;}
+  .btn.primary{background:var(--accent);border-color:var(--accent);color:var(--card);font-weight:600;}
+  .btn.green{background:var(--green);border-color:var(--green);color:var(--card);font-weight:600;}
+  .btn.ghost{background:transparent;}
+  .btn:disabled{opacity:.6;}
+  .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+  .row > .grow{flex:1;}
+  .back-btn{background:none;border:none;color:var(--accent);font-size:13.5px;padding:8px 0;cursor:pointer;font-family:'Noto Sans KR',sans-serif;}
+  .list-head{display:flex;justify-content:space-between;align-items:baseline;margin:10px 0 6px;}
+  .list-head h2{font-family:'Song Myung',serif;font-weight:400;font-size:21px;margin:0;}
+  .list-head span{font-size:12px;color:var(--ink-muted);}
+  .vcard{display:flex;gap:12px;background:var(--card);border:1px solid var(--line);padding:11px;margin-top:8px;align-items:center;cursor:pointer;position:relative;}
+  .vcard:active{transform:translateY(1px);}
+  .rank{font-family:'Song Myung',serif;font-size:22px;color:var(--accent);width:22px;text-align:center;flex:none;}
+  .vthumb{width:96px;height:68px;flex:none;border-radius:3px;background:#0002 center/cover;}
+  .vbody{min-width:0;flex:1;}
+  .vtitle{font-size:13.5px;font-weight:600;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+  .vsub{font-size:11.5px;color:var(--ink-muted);margin-top:3px;}
+  .vprev{font-size:11.5px;margin-top:4px;}
+  .vprev.ok{color:var(--green);font-weight:600;}
+  .vprev.no{color:var(--ink-muted);}
+  .tag{display:inline-block;font-size:10.5px;padding:1px 6px;border-radius:2px;background:var(--green);color:var(--card);margin-left:4px;vertical-align:1px;}
+  .tag.red{background:var(--accent);}
+  .serv{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:13.5px;}
+  .serv input{width:52px;padding:7px;border:1px solid var(--line);background:var(--card);color:var(--ink);text-align:center;font-size:14px;border-radius:2px;}
+  .stepper{display:inline-flex;align-items:center;border:1px solid var(--line);background:var(--card);}
+  .stepper button{background:none;border:none;width:34px;height:34px;font-size:18px;color:var(--accent);cursor:pointer;}
+  .stepper b{min-width:54px;text-align:center;font-size:14px;}
+  .scaled{background:var(--card);border:1px dashed var(--green);padding:10px 12px;margin-top:10px;font-size:13.5px;line-height:1.8;}
+  .scaled b{color:var(--green);}
+  .field{width:100%;padding:11px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-family:'Noto Sans KR',sans-serif;font-size:14px;border-radius:2px;}
+  .shop-item{display:flex;gap:10px;align-items:flex-start;padding:11px 0;border-bottom:1px solid var(--line);}
+  .shop-item input{width:20px;height:20px;margin-top:1px;flex:none;accent-color:var(--green);}
+  .shop-item .t{flex:1;font-size:14.5px;line-height:1.45;}
+  .shop-item.done .t{text-decoration:line-through;color:var(--ink-muted);}
+  .shop-item .from{font-size:11px;color:var(--ink-muted);display:block;}
+  .shop-item .x{background:none;border:none;color:var(--ink-muted);font-size:16px;cursor:pointer;}
+  .selbar{position:sticky;bottom:58px;background:var(--ink);color:var(--card);padding:10px 14px;display:flex;justify-content:space-between;align-items:center;margin-top:12px;font-size:13.5px;}
+  .selbar button{background:var(--accent);color:var(--card);border:none;padding:9px 14px;font-weight:600;border-radius:2px;}
+  .chk{width:22px;height:22px;flex:none;accent-color:var(--accent);}
+  footer.tab .t{cursor:pointer;}
+  /* 요리 모드 */
+  #cook{display:none;position:fixed;inset:0;background:var(--bg);z-index:60;flex-direction:column;}
+  #cook.show{display:flex;}
+  #cook .ch{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-bottom:1px solid var(--line);}
+  #cook .ch b{font-family:'Song Myung',serif;font-weight:400;font-size:19px;}
+  #cook .cb{flex:1;overflow:auto;padding:22px 22px 10px;}
+  #cook .cnum{color:var(--accent);font-family:'Song Myung',serif;font-size:16px;}
+  #cook .ctext{font-size:25px;line-height:1.6;margin-top:10px;word-break:keep-all;}
+  #cook .cf{display:flex;gap:10px;padding:12px 18px 18px;}
+  #cook .cf button{flex:1;padding:16px;font-size:16px;}
+  .timer-btn{margin:16px 8px 0 0;}
+  #timerBar{display:none;background:var(--green);color:var(--card);padding:10px 18px;font-size:15px;justify-content:space-between;align-items:center;}
+  #timerBar.show{display:flex;}
+  #timerBar.ring{background:var(--accent);animation:blink .6s infinite alternate;}
+  @keyframes blink{to{opacity:.6;}}
+  #cookIng{display:none;background:var(--card);border-top:1px solid var(--line);padding:12px 18px;max-height:40vh;overflow:auto;font-size:15px;line-height:1.8;}
+  #cookIng.show{display:block;}
+  .toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:var(--ink);color:var(--card);padding:10px 16px;border-radius:20px;font-size:13px;z-index:80;opacity:0;transition:opacity .2s;pointer-events:none;max-width:90%;text-align:center;}
+  .toast.show{opacity:1;}
 </style>
 </head>
 <body>
@@ -368,183 +430,314 @@
       <button id="settingsBtn" aria-label="설정" style="background:none;border:1px solid var(--line);color:var(--ink-muted);width:32px;height:32px;border-radius:50%;font-size:14px;cursor:pointer;">⚙</button>
     </div>
     <h1 class="title">오늘은 뭐 해먹지?</h1>
-    <p class="sub">요리 이름을 검색하면, 유튜브에서 가장 많이 본 영상을 기준으로 재료와 조리법을 정리해드려요.</p>
+    <p class="sub">요리 이름을 검색하면 유튜브 조회수 TOP 5 영상을 보여드려요. 하나를 고르면 재료와 조리 순서를 정리해서 저장해요.</p>
   </header>
 
-  <div class="search-wrap">
-    <form class="search" id="searchForm">
-      <input id="searchInput" type="text" placeholder="예: 소갈비찜, 김치찌개" autocomplete="off">
-      <button type="submit">검색</button>
-    </form>
+  <div id="searchArea">
+    <div class="search-wrap">
+      <form class="search" id="searchForm">
+        <input id="searchInput" type="text" placeholder="예: 소갈비찜, 김치찌개" autocomplete="off">
+        <button type="submit">검색</button>
+      </form>
+    </div>
+    <div class="chips" id="chips"></div>
   </div>
-
-  <div class="chips" id="chips"></div>
 
   <main>
     <div id="view-search">
       <div class="loading" id="loading">
         <div class="pot"></div>
-        <div class="loading-step" id="loadingStep">가장 많이 본 영상 찾는 중…</div>
+        <div class="loading-step" id="loadingStep">유튜브에서 검색하는 중…</div>
       </div>
-
-      <div class="empty" id="empty">
-        <span class="glyph">鍋</span>
-        <p>요리 이름을 입력하면<br>가장 인기 있는 레시피를 정리해서 보여드려요.</p>
-      </div>
-
+      <div class="empty" id="empty"></div>
       <div class="result" id="result"></div>
     </div>
-
-    <div id="view-saved" style="display:none;">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin:8px 0 4px;">
-        <h2 style="font-family:'Song Myung',serif;font-weight:400;font-size:22px;margin:0;">저장한 레시피</h2>
-        <label style="display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--ink-muted);">
-          <input type="checkbox" id="favOnlyToggle"> 즐겨찾기만
-        </label>
-      </div>
-      <div id="savedList"></div>
-    </div>
+    <div id="view-saved" style="display:none;"></div>
+    <div id="view-shop" style="display:none;"></div>
+    <div id="view-recent" style="display:none;"></div>
   </main>
 
   <footer class="tab">
     <div class="t on" data-view="search"><span class="ic">検</span>검색</div>
     <div class="t" data-view="saved"><span class="ic">札</span>저장한 레시피</div>
+    <div class="t" data-view="shop"><span class="ic">買</span>장보기</div>
     <div class="t" data-view="recent"><span class="ic">歴</span>최근 본 요리</div>
   </footer>
 </div>
 
 <div id="settingsOverlay" style="display:none;position:fixed;inset:0;background:rgba(43,38,32,0.55);z-index:50;align-items:center;justify-content:center;padding:20px;">
-  <div style="background:var(--card);max-width:400px;width:100%;padding:24px;border-radius:4px;">
+  <div style="background:var(--card);max-width:400px;width:100%;padding:24px;border-radius:4px;max-height:92vh;overflow:auto;">
     <h3 style="font-family:'Song Myung',serif;font-weight:400;font-size:20px;margin:0 0 6px;">유튜브 API 키 설정</h3>
-    <p style="font-size:13px;color:var(--ink-muted);line-height:1.6;margin:0 0 16px;">이 기기의 브라우저에만 저장돼요. 다른 사람과 파일을 공유해도 키는 같이 전달되지 않아요.</p>
-    <input id="apiKeyInput" type="password" placeholder="AIza… 로 시작하는 키" style="width:100%;padding:11px;border:1px solid var(--line);border-radius:2px;font-size:14px;background:var(--bg);color:var(--ink);margin-bottom:8px;" autocomplete="off">
+    <p style="font-size:13px;color:var(--ink-muted);line-height:1.6;margin:0 0 12px;">이 기기에만 저장돼요. 백업 파일에도 키는 들어가지 않아요.</p>
+    <input id="apiKeyInput" type="password" placeholder="AIza… 로 시작하는 키" class="field" style="background:var(--bg);margin-bottom:8px;" autocomplete="off">
     <h3 style="font-family:'Song Myung',serif;font-weight:400;font-size:17px;margin:14px 0 6px;">Gemini API 키 (무료 · 추천)</h3>
-    <p style="font-size:12.5px;color:var(--ink-muted);line-height:1.6;margin:0 0 10px;">자동 정리에 써요. aistudio.google.com 에서 구글 계정으로 무료 발급 (카드 등록 불필요). 키가 없어도 AI 없이 무료 자동 추출은 돼요.</p>
-    <input id="geminiKeyInput" type="password" placeholder="AIza… 로 시작하는 키" style="width:100%;padding:11px;border:1px solid var(--line);border-radius:2px;font-size:14px;background:var(--bg);color:var(--ink);margin-bottom:8px;" autocomplete="off">
+    <p style="font-size:12.5px;color:var(--ink-muted);line-height:1.6;margin:0 0 10px;">자동 정리에 써요. aistudio.google.com 에서 결제 연결 안 된 프로젝트로 무료 발급. 키가 없어도 AI 없이 무료 자동 추출은 돼요.</p>
+    <input id="geminiKeyInput" type="password" placeholder="Gemini 키" class="field" style="background:var(--bg);margin-bottom:8px;" autocomplete="off">
     <h3 style="font-family:'Song Myung',serif;font-weight:400;font-size:15px;margin:12px 0 6px;color:var(--ink-muted);">Claude API 키 (선택 · 유료)</h3>
-    <input id="claudeKeyInput" type="password" placeholder="sk-ant-… 로 시작하는 키" style="width:100%;padding:11px;border:1px solid var(--line);border-radius:2px;font-size:14px;background:var(--bg);color:var(--ink);margin-bottom:8px;" autocomplete="off">
+    <input id="claudeKeyInput" type="password" placeholder="sk-ant-… 로 시작하는 키" class="field" style="background:var(--bg);margin-bottom:8px;" autocomplete="off">
     <label style="display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--ink-muted);margin-bottom:16px;">
       <input type="checkbox" id="showKeyToggle"> 입력한 키 표시
     </label>
     <div style="display:flex; gap:8px;">
-      <button id="settingsCancel" style="flex:1;padding:11px;border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:2px;cursor:pointer;font-size:14px;">닫기</button>
-      <button id="settingsSave" style="flex:1;padding:11px;border:none;background:var(--accent);color:var(--card);border-radius:2px;cursor:pointer;font-size:14px;font-weight:600;">저장</button>
+      <button id="settingsCancel" class="btn ghost" style="flex:1;">닫기</button>
+      <button id="settingsSave" class="btn primary" style="flex:1;">저장</button>
     </div>
+    <h3 style="font-family:'Song Myung',serif;font-weight:400;font-size:17px;margin:22px 0 6px;border-top:1px solid var(--line);padding-top:16px;">백업 · 불러오기</h3>
+    <p style="font-size:12.5px;color:var(--ink-muted);line-height:1.6;margin:0 0 10px;">레시피는 이 기기에만 저장돼요. 앱을 지우거나 폰을 바꾸기 전에 백업 파일로 내보내 두세요.</p>
+    <div style="display:flex; gap:8px;">
+      <button id="exportBtn" class="btn" style="flex:1;">⬇ 백업 내보내기</button>
+      <button id="importBtn" class="btn" style="flex:1;">⬆ 불러오기</button>
+    </div>
+    <input type="file" id="importFile" accept=".json,application/json,text/plain" style="display:none;">
   </div>
 </div>
 
+<div id="cook">
+  <div class="ch"><b id="cookTitle"></b><button class="btn ghost" id="cookClose">닫기 ✕</button></div>
+  <div id="timerBar"><span id="timerText"></span><button class="btn" id="timerStop" style="padding:6px 10px;">끄기</button></div>
+  <div class="cb">
+    <div class="cnum" id="cookNum"></div>
+    <div class="ctext" id="cookText"></div>
+    <div id="cookTimers"></div>
+  </div>
+  <div id="cookIng"></div>
+  <div class="cf">
+    <button class="btn" id="cookIngBtn" style="flex:.7;">재료</button>
+    <button class="btn" id="cookPrev">◀ 이전</button>
+    <button class="btn primary" id="cookNext">다음 ▶</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
 <script>
-// ---- 샘플 데이터 (실제 유튜브 연동 전, 화면 확인용) ----
-const DB = {
-  "소갈비찜": {
-    tagline: "명절 단골 메뉴, 압력솥으로 부드럽게",
-    video: { title: "실패 없는 소갈비찜 만들기 | 한번에 부드러워지는 비법", channel: "집밥의정석", views: "312만", color1:"#B23A2E", color2:"#7A2419" },
-    time: "1시간 20분", servings: "4인분", level: "중급",
-    ingredients: [
-      ["소갈비","1.2kg"],["무","1/3개"],["당근","1개"],["표고버섯","4개"],["대파","1대"],
-      ["간장","6큰술"],["배","1/2개(갈아서)"],["양파","1개(갈아서)"],["마늘","1큰술"],["설탕","2큰술"],["참기름","1큰술"]
-    ],
-    steps: [
-      "갈비는 찬물에 1시간 이상 담가 핏물을 뺀다.",
-      "끓는 물에 갈비를 넣고 5분간 데친 뒤 헹궈 불순물을 제거한다.",
-      "간장, 갈아 넣은 배·양파, 마늘, 설탕을 섞어 양념장을 만든다.",
-      "데친 갈비에 양념장을 붓고 30분 이상 재운다.",
-      "무와 당근은 큼직하게 썰어 모서리를 다듬는다.",
-      "압력솥에 갈비와 양념장을 넣고 15분간 가압한다.",
-      "무와 표고버섯을 넣고 5분 더 끓인 뒤, 대파와 참기름을 넣고 마무리한다."
-    ],
-    tips: "<b>꿀팁 —</b> 핏물을 충분히 빼고 한 번 데치면 잡내가 확실히 줄어들어요. 무는 너무 일찍 넣으면 물러지니 마지막 단계에 넣는 게 좋아요."
-  },
-  "김치찌개": {
-    tagline: "묵은지로 끓이면 깊은 맛이 배가 되는 국민 메뉴",
-    video: { title: "돼지고기 듬뿍 김치찌개, 이 순서만 지키세요", channel: "오늘의집밥", views: "487만", color1:"#8C2C22", color2:"#4A140F" },
-    time: "30분", servings: "2인분", level: "초급",
-    ingredients: [
-      ["신 김치","1/4포기"],["돼지고기(목살)","200g"],["김치국물","1/2컵"],["두부","1/2모"],
-      ["대파","1대"],["양파","1/2개"],["고춧가루","1큰술"],["다진마늘","1작은술"],["국물용 멸치육수","3컵"]
-    ],
-    steps: [
-      "돼지고기를 냄비에 넣고 겉면이 익을 때까지 볶는다.",
-      "신 김치를 넣고 고기 기름이 배도록 함께 볶는다.",
-      "김치국물과 육수를 부어 끓인다.",
-      "양파, 고춧가루, 다진마늘을 넣고 중불에서 15분 끓인다.",
-      "두부와 대파를 넣고 5분 더 끓여 마무리한다."
-    ],
-    tips: "<b>꿀팁 —</b> 김치를 먼저 볶는 과정을 생략하지 마세요. 이 한 단계로 찌개 국물 맛이 확 달라져요."
-  },
-  "된장찌개": {
-    tagline: "구수하고 담백한, 매일 먹어도 질리지 않는 맛",
-    video: { title: "된장찌개 황금비율, 이거 하나면 끝", channel: "집밥의정석", views: "256만", color1:"#6B7A52", color2:"#3E4A2E" },
-    time: "25분", servings: "2인분", level: "초급",
-    ingredients: [
-      ["된장","2큰술"],["애호박","1/3개"],["감자","1개"],["두부","1/2모"],["양파","1/4개"],
-      ["청양고추","1개"],["다진마늘","1작은술"],["멸치육수","2컵과1/2"]
-    ],
-    steps: [
-      "멸치육수에 된장을 풀어 중불에서 끓인다.",
-      "감자와 양파를 넣고 5분간 끓인다.",
-      "애호박과 두부를 넣고 5분 더 끓인다.",
-      "다진마늘과 청양고추를 넣어 한소끔 끓이고 불을 끈다."
-    ],
-    tips: "<b>꿀팁 —</b> 된장을 체에 걸러 풀면 국물이 훨씬 매끄러워져요."
-  },
-  "계란말이": {
-    tagline: "도시락 단골, 폭신하게 마는 게 관건",
-    video: { title: "학교급식 계란말이, 겉바속촉 비율 공개", channel: "쉬운집밥", views: "198만", color1:"#B8942F", color2:"#7A5F1C" },
-    time: "15분", servings: "2인분", level: "초급",
-    ingredients: [
-      ["계란","5개"],["당근","약간(다진 것)"],["대파","약간(다진 것)"],["소금","1/3작은술"],["식용유","약간"]
-    ],
-    steps: [
-      "계란을 풀어 체에 한 번 거른다.",
-      "다진 당근, 대파, 소금을 넣고 섞는다.",
-      "약불로 예열한 팬에 기름을 살짝 두른다.",
-      "계란물을 얇게 부어 반쯤 익으면 돌돌 만다.",
-      "같은 과정을 반복해 층을 쌓고, 김발로 모양을 잡아 식힌 뒤 썬다."
-    ],
-    tips: "<b>꿀팁 —</b> 불을 약하게 유지해야 층이 갈라지지 않아요. 서두르면 실패 확률이 올라가요."
-  }
+// ================= 레시피 찾기 v2 =================
+const $ = id => document.getElementById(id);
+function escapeHtml(s){
+  return String(s == null ? '' : s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function toast(t){
+  const el = $('toast'); el.textContent = t; el.classList.add('show');
+  clearTimeout(toast._t); toast._t = setTimeout(()=> el.classList.remove('show'), 2200);
+}
+function fmtViews(n){
+  n = parseInt(n,10) || 0;
+  if(n >= 10000) return (n/10000).toFixed(1).replace(/\.0$/,'') + '만';
+  return n.toLocaleString('ko-KR');
+}
+function timeAgo(t){
+  const m = Math.floor((Date.now() - t) / 60000);
+  if(m < 1) return '방금'; if(m < 60) return m + '분 전';
+  const h = Math.floor(m / 60); if(h < 24) return h + '시간 전';
+  const d = Math.floor(h / 24); return d < 30 ? d + '일 전' : new Date(t).toLocaleDateString('ko-KR');
+}
+const LS = {
+  get(k, d){ try{ const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; }catch(e){ return d; } },
+  set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){ alert('저장 공간이 부족해요. 오래된 레시피를 정리하거나 백업 후 지워주세요.'); } }
 };
 
-// 키는 파일에 저장하지 않고, 이 브라우저의 localStorage에서만 읽어옵니다.
-const YT_KEY_STORAGE = 'yt_api_key';
+// ---- 키 ----
+const YT_KEY_STORAGE = 'yt_api_key', CLAUDE_KEY_STORAGE = 'claude_api_key', GEMINI_KEY_STORAGE = 'gemini_api_key';
 function getApiKey(){ return localStorage.getItem(YT_KEY_STORAGE) || ''; }
-const CLAUDE_KEY_STORAGE = 'claude_api_key';
 function getClaudeKey(){ return localStorage.getItem(CLAUDE_KEY_STORAGE) || ''; }
-const GEMINI_KEY_STORAGE = 'gemini_api_key';
 function getGeminiKey(){ return localStorage.getItem(GEMINI_KEY_STORAGE) || ''; }
 
+// ---- 데이터 (영상별 저장) ----
+const K_REC = 'recipes_v2', K_SHOP = 'shopping_v1', K_RECENT = 'recent_v1';
+const CATEGORIES = ["국/찌개","밥/죽","면","반찬","고기/구이","분식","디저트/간식","기타"];
+(function migrate(){
+  if(localStorage.getItem(K_REC)) return;
+  const old = LS.get('saved_recipes_v1', null);
+  const out = {};
+  if(old){
+    Object.keys(old).forEach((dish, i) => {
+      const o = old[dish], v = o.video || {};
+      const id = v.videoId || ('r' + Date.now() + i);
+      out[id] = { id, dish, videoId: v.videoId || '', title: v.title || dish, channel: v.channelTitle || '', thumb: v.thumb || '',
+        views: v.views || 0, description: v.description || '', ing: o.ing || '', steps: o.steps || '', tips: o.tips || '',
+        category: o.category || '기타', favorite: !!o.favorite, servings: 2, savedAt: o.savedAt || Date.now() };
+    });
+  }
+  LS.set(K_REC, out);
+})();
+const getRecipes = () => LS.get(K_REC, {});
+const setRecipes = m => LS.set(K_REC, m);
+const lines = t => String(t || '').split('\n').map(s => s.trim()).filter(Boolean);
+function recipeFromVideo(dish, v){
+  return { id: v.id, dish, videoId: v.id, title: v.snippet.title, channel: v.snippet.channelTitle,
+    thumb: v.snippet.thumbnails?.medium?.url || v.snippet.thumbnails?.default?.url || '',
+    views: v.statistics?.viewCount || 0, description: (v.snippet.description || '').slice(0, 8000),
+    ing: '', steps: '', tips: '', category: guessCategory(dish), favorite: false, servings: 2, savedAt: 0 };
+}
+function guessCategory(d){
+  if(/찌개|국|탕|전골|스튜/.test(d)) return '국/찌개';
+  if(/밥|죽|덮밥|볶음밥|김밥|리조또/.test(d)) return '밥/죽';
+  if(/면|국수|파스타|라면|우동|냉면|짬뽕|짜장/.test(d)) return '면';
+  if(/떡볶이|순대|튀김|어묵|라볶이/.test(d)) return '분식';
+  if(/갈비|불고기|삼겹|구이|스테이크|제육|닭|찜/.test(d)) return '고기/구이';
+  if(/케이크|쿠키|빵|디저트|푸딩|과자|떡/.test(d)) return '디저트/간식';
+  if(/무침|나물|볶음|조림|전|김치|장아찌|계란/.test(d)) return '반찬';
+  return '기타';
+}
+
+// ---- 최근 본 요리 ----
+function addRecent(r){
+  let list = LS.get(K_RECENT, []).filter(x => x.id !== r.id);
+  list.unshift({ id: r.id, dish: r.dish, videoId: r.videoId, title: r.title, channel: r.channel, thumb: r.thumb, views: r.views,
+    description: (r.description || '').slice(0, 5000), at: Date.now() });
+  LS.set(K_RECENT, list.slice(0, 30));
+}
+
 // ---- 설정창 ----
-const settingsOverlay = document.getElementById('settingsOverlay');
-const apiKeyInput = document.getElementById('apiKeyInput');
-const claudeKeyInput = document.getElementById('claudeKeyInput');
-const geminiKeyInput = document.getElementById('geminiKeyInput');
+const settingsOverlay = $('settingsOverlay');
 function openSettings(){
-  apiKeyInput.value = getApiKey();
-  claudeKeyInput.value = getClaudeKey();
-  geminiKeyInput.value = getGeminiKey();
+  $('apiKeyInput').value = getApiKey(); $('geminiKeyInput').value = getGeminiKey(); $('claudeKeyInput').value = getClaudeKey();
   settingsOverlay.style.display = 'flex';
 }
 function closeSettings(){ settingsOverlay.style.display = 'none'; }
-document.getElementById('settingsBtn').onclick = openSettings;
-document.getElementById('settingsCancel').onclick = closeSettings;
-document.getElementById('showKeyToggle').onchange = (e)=>{
-  apiKeyInput.type = e.target.checked ? 'text' : 'password';
-  claudeKeyInput.type = e.target.checked ? 'text' : 'password';
-  geminiKeyInput.type = e.target.checked ? 'text' : 'password';
+$('settingsBtn').onclick = openSettings;
+$('settingsCancel').onclick = closeSettings;
+settingsOverlay.addEventListener('click', e => { if(e.target === settingsOverlay) closeSettings(); });
+$('showKeyToggle').onchange = e => ['apiKeyInput','geminiKeyInput','claudeKeyInput'].forEach(id => $(id).type = e.target.checked ? 'text' : 'password');
+$('settingsSave').onclick = () => {
+  [[YT_KEY_STORAGE,'apiKeyInput'],[GEMINI_KEY_STORAGE,'geminiKeyInput'],[CLAUDE_KEY_STORAGE,'claudeKeyInput']].forEach(([k,id]) => {
+    const v = $(id).value.trim(); if(v) localStorage.setItem(k, v); else localStorage.removeItem(k);
+  });
+  closeSettings(); toast('저장했어요');
+  if(currentView === 'search' && !$('result').classList.contains('show')) showEmptyDefault();
 };
-document.getElementById('settingsSave').onclick = ()=>{
-  const v = apiKeyInput.value.trim();
-  if(v) localStorage.setItem(YT_KEY_STORAGE, v);
-  else localStorage.removeItem(YT_KEY_STORAGE);
-  const c = claudeKeyInput.value.trim();
-  if(c) localStorage.setItem(CLAUDE_KEY_STORAGE, c);
-  else localStorage.removeItem(CLAUDE_KEY_STORAGE);
-  const g = geminiKeyInput.value.trim();
-  if(g) localStorage.setItem(GEMINI_KEY_STORAGE, g);
-  else localStorage.removeItem(GEMINI_KEY_STORAGE);
-  closeSettings();
+
+// ---- 백업 / 불러오기 ----
+$('exportBtn').onclick = () => {
+  const data = { app: 'recipe-finder', version: 2, exportedAt: new Date().toISOString(),
+    recipes: getRecipes(), shopping: LS.get(K_SHOP, []), recent: LS.get(K_RECENT, []) };
+  const json = JSON.stringify(data, null, 1);
+  const d = new Date(), name = `레시피백업_${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}.json`;
+  if(window.AndroidBridge && AndroidBridge.saveFile){ AndroidBridge.saveFile(name, json); return; }
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([json], { type: 'application/json' }));
+  a.download = name; document.body.appendChild(a); a.click(); a.remove();
+  toast(`레시피 ${Object.keys(data.recipes).length}개를 내보냈어요`);
 };
+window.onAndroidSaved = ok => toast(ok ? '백업 파일을 저장했어요' : '저장을 취소했어요');
+$('importBtn').onclick = () => $('importFile').click();
+$('importFile').onchange = async e => {
+  const f = e.target.files[0]; e.target.value = '';
+  if(!f) return;
+  try{
+    const data = JSON.parse(await f.text());
+    if(!data.recipes) throw new Error('레시피 백업 파일이 아니에요');
+    const cur = getRecipes(); let added = 0, updated = 0;
+    Object.values(data.recipes).forEach(r => {
+      if(!r || !r.id) return;
+      if(!cur[r.id]){ cur[r.id] = r; added++; }
+      else if((r.savedAt || 0) > (cur[r.id].savedAt || 0)){ cur[r.id] = r; updated++; }
+    });
+    setRecipes(cur);
+    if(Array.isArray(data.shopping) && data.shopping.length && confirm('장보기 목록도 백업 파일 내용으로 합칠까요?')){
+      const shop = LS.get(K_SHOP, []); data.shopping.forEach(it => { if(!shop.find(x => x.id === it.id)) shop.push(it); }); LS.set(K_SHOP, shop);
+    }
+    if(Array.isArray(data.recent)){
+      const rec = LS.get(K_RECENT, []); data.recent.forEach(it => { if(!rec.find(x => x.id === it.id)) rec.push(it); });
+      rec.sort((a,b) => b.at - a.at); LS.set(K_RECENT, rec.slice(0, 30));
+    }
+    closeSettings(); toast(`불러오기 완료: 새 레시피 ${added}개, 갱신 ${updated}개`);
+    switchView('saved');
+  }catch(err){ alert('불러오기 실패: ' + err.message); }
+};
+
+// ---- 인분 계산 ----
+const FRACS = [[0,''],[1/4,'1/4'],[1/3,'1/3'],[1/2,'1/2'],[2/3,'2/3'],[3/4,'3/4']];
+function fmtQty(x, decimal){
+  if(decimal) return String(Math.round(x * 100) / 100);
+  if(x >= 10) return String(Math.round(x));
+  const w = Math.floor(x + 1e-9), f = x - w;
+  if(f > 0.92) return String(w + 1);
+  let best = null;
+  FRACS.forEach(([v, s]) => { if(Math.abs(f - v) <= 0.03 && (!best || Math.abs(f - v) < Math.abs(f - best[0]))) best = [v, s]; });
+  if(best){ if(!best[1]) return String(w); return w ? `${w} ${best[1]}` : best[1]; }
+  return (Math.round(x * 10) / 10).toString();
+}
+const QTY_RE = /(\d+)\s*(?:과|와|\s)\s*(\d+)\s*\/\s*(\d+)|(\d+)\s*\/\s*(\d+)|(\d+(?:\.\d+)?)/;
+function parseQty(m){
+  if(m[1]) return +m[1] + (+m[2]) / (+m[3]);
+  if(m[4]) return (+m[4]) / (+m[5]);
+  return parseFloat(m[6]);
+}
+function scaleLine(line, factor){
+  if(factor === 1) return line;
+  const m = line.match(QTY_RE);
+  if(!m) return line;
+  const v = parseQty(m);
+  if(!isFinite(v) || v <= 0) return line;
+  return line.slice(0, m.index) + fmtQty(v * factor, !!(m[6] && m[6].includes('.'))) + line.slice(m.index + m[0].length);
+}
+function splitNameQty(line){
+  const m = line.match(QTY_RE) || line.match(/약간|적당량|조금|한\s?줌|한\s?꼬집/);
+  if(!m || m.index === 0) return { name: line.trim(), qty: '' };
+  return { name: line.slice(0, m.index).replace(/[:：\-\s]+$/,'').trim(), qty: line.slice(m.index).trim() };
+}
+
+// ---- 장보기 ----
+function addToShopping(r, factor){
+  const shop = LS.get(K_SHOP, []);
+  let n = 0;
+  lines(r.ing).forEach(l => {
+    const line = scaleLine(l, factor || 1);
+    const { name, qty } = splitNameQty(line);
+    const key = name.replace(/\s|\(.*?\)/g, '');
+    const ex = shop.find(x => !x.checked && x.key === key);
+    if(ex){
+      if(qty){
+        const a = ex.qty.match(QTY_RE), b = qty.match(QTY_RE);
+        const ua = a ? ex.qty.slice(a.index + a[0].length).trim() : null, ub = b ? qty.slice(b.index + b[0].length).trim() : null;
+        if(a && b && ua === ub && ex.qty.slice(0, a.index).trim() === '' && qty.slice(0, b.index).trim() === '') ex.qty = fmtQty(parseQty(a) + parseQty(b), /\./.test(a[0] + b[0])) + (ua ? ' ' + ua : '');
+        else ex.qty = ex.qty ? ex.qty + ' + ' + qty : qty;
+      }
+      if(!ex.from.includes(r.dish)) ex.from.push(r.dish);
+    } else {
+      shop.push({ id: 's' + Date.now() + Math.random().toString(36).slice(2, 6), key, name, qty, checked: false, from: [r.dish] });
+    }
+    n++;
+  });
+  LS.set(K_SHOP, shop);
+  return n;
+}
+function renderShop(){
+  const shop = LS.get(K_SHOP, []);
+  const left = shop.filter(x => !x.checked).length;
+  $('view-shop').innerHTML = `
+    <div class="list-head"><h2>장보기 목록</h2><span>${shop.length ? `남은 것 ${left}개 / 전체 ${shop.length}개` : ''}</span></div>
+    <form id="shopAddForm" class="row" style="margin:8px 0 6px;">
+      <input id="shopAddInput" class="field grow" placeholder="직접 추가 (예: 우유 1팩)" autocomplete="off">
+      <button class="btn primary" type="submit">추가</button>
+    </form>
+    <div class="row" style="margin:4px 0 6px;">
+      <button class="btn" id="shopFromSaved">📋 저장한 레시피에서 담기</button>
+      <button class="btn ghost" id="shopClearDone">체크한 것 지우기</button>
+      <button class="btn ghost" id="shopClearAll">전체 비우기</button>
+    </div>
+    <div id="shopList">${shop.length ? shop.map(it => `
+      <div class="shop-item ${it.checked ? 'done' : ''}" data-id="${it.id}">
+        <input type="checkbox" ${it.checked ? 'checked' : ''}>
+        <div class="t">${escapeHtml(it.name)} ${it.qty ? `<b style="font-weight:600;">${escapeHtml(it.qty)}</b>` : ''}<span class="from">${escapeHtml(it.from.join(', '))}</span></div>
+        <button class="x" aria-label="삭제">✕</button>
+      </div>`).join('') : `<div class="empty show" style="padding:40px 6px;"><span class="glyph">買</span><p>장볼 재료가 없어요.<br>레시피 화면의 🛒 버튼이나 위의 '저장한 레시피에서 담기'로 재료를 모아보세요.</p></div>`}</div>`;
+  $('shopAddForm').onsubmit = e => {
+    e.preventDefault(); const v = $('shopAddInput').value.trim(); if(!v) return;
+    const s = LS.get(K_SHOP, []); const { name, qty } = splitNameQty(v);
+    s.push({ id: 's' + Date.now(), key: name.replace(/\s/g,''), name, qty, checked: false, from: ['직접 추가'] }); LS.set(K_SHOP, s); renderShop();
+  };
+  $('shopFromSaved').onclick = () => { selectMode = true; selected.clear(); switchView('saved'); };
+  $('shopClearDone').onclick = () => { LS.set(K_SHOP, LS.get(K_SHOP, []).filter(x => !x.checked)); renderShop(); };
+  $('shopClearAll').onclick = () => { if(confirm('장보기 목록을 모두 지울까요?')){ LS.set(K_SHOP, []); renderShop(); } };
+  document.querySelectorAll('.shop-item').forEach(el => {
+    const id = el.dataset.id;
+    el.querySelector('input').onchange = ev => { const s = LS.get(K_SHOP, []); const it = s.find(x => x.id === id); if(it){ it.checked = ev.target.checked; LS.set(K_SHOP, s); } renderShop(); };
+    el.querySelector('.t').onclick = () => el.querySelector('input').click();
+    el.querySelector('.x').onclick = () => { LS.set(K_SHOP, LS.get(K_SHOP, []).filter(x => x.id !== id)); renderShop(); };
+  });
+}
 
 // ---- 재료/조리순서 자동 정리 ----
 // 순서: Gemini(무료) → Claude(유료, 키가 있을 때만) → AI 없이 규칙 기반 추출
@@ -552,7 +745,7 @@ function buildPrompt(dish, title, text){
   return `아래는 유튜브 요리 영상 "${title}"의 설명과 자막이에요. 요리 이름: ${dish}
 
 이 텍스트에서 재료와 조리 순서를 뽑아 JSON으로만 답하세요. 다른 말은 쓰지 마세요.
-형식: {"ingredients":[["재료명","양"]],"steps":["조리 단계"],"tips":"팁 한두 문장 또는 빈 문자열"}
+형식: {"ingredients":[["재료명","양"]],"steps":["조리 단계"],"tips":"팁 한두 문장 또는 빈 문자열","servings":몇 인분인지 숫자(모르면 0)}
 규칙:
 - 텍스트에 실제로 나온 내용만 쓰세요. 없는 재료나 양을 지어내지 마세요. 양을 모르면 ""로 두세요.
 - 조리 단계는 짧고 명확한 한국어 문장으로, 순서대로 정리하세요. 자막의 군더더기 말은 빼세요.
@@ -657,7 +850,9 @@ function extractRuleBased(description, transcript){
       if(m) steps.push(m[2]);
     });
   }
-  return { ingredients: ingredients.map(x => [x, '']), steps, tips: '' };
+  const sv = (description || '').match(/(\d{1,2})\s*인분/);
+  const ings = ingredients.filter(x => !/^\(?\d{1,2}\s*인분\)?$/.test(x.replace(/\s/g,'')));
+  return { ingredients: ings.map(x => [x, '']), steps, tips: '', servings: sv ? +sv[1] : 0 };
 }
 
 async function summarizeRecipe(dish, title, description, transcript){
@@ -680,328 +875,431 @@ async function summarizeRecipe(dish, title, description, transcript){
   }
   return { ...extractRuleBased(description, transcript), method: 'AI 없이 자동 추출', notes };
 }
-settingsOverlay.addEventListener('click', (e)=>{ if(e.target === settingsOverlay) closeSettings(); });
 
-const chipsEl = document.getElementById('chips');
-Object.keys(DB).forEach(name=>{
-  const c = document.createElement('div');
-  c.className='chip'; c.textContent=name;
-  c.onclick=()=>{ document.getElementById('searchInput').value=name; runSearch(name); };
-  chipsEl.appendChild(c);
-});
-
-const loadingSteps = ["유튜브에서 검색하는 중…","조회수 기준으로 정렬하는 중…"];
-
-function fmtViews(n){
-  n = parseInt(n,10) || 0;
-  if(n >= 10000) return (n/10000).toFixed(1).replace(/\.0$/,'') + '만';
-  return n.toLocaleString('ko-KR');
-}
-
+// ---- 유튜브 검색: 조회수 TOP 5 (먹방 등 제외) ----
+const NOT_RECIPE = /먹방|mukbang|asmr|eating\s?show|리액션|reaction|브이로그|vlog|챌린지|challenge|#shorts/i;
 async function ytSearch(q){
   const key = getApiKey();
-  if(!key){
-    const err = new Error('API 키가 설정되어 있지 않아요. 오른쪽 위 ⚙ 버튼을 눌러 먼저 입력해주세요.');
-    err.noKey = true;
-    throw err;
-  }
-  const searchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(q+' 레시피 만들기')}&order=viewCount&type=video&maxResults=15&relevanceLanguage=ko&key=${key}`;
-  const searchRes = await fetch(searchUrl);
-  const searchData = await searchRes.json();
-  if(searchData.error) throw new Error(searchData.error.message || 'API 오류');
-  if(!searchData.items || !searchData.items.length) return null;
+  if(!key){ const err = new Error('유튜브 API 키가 없어요. 오른쪽 위 ⚙ 버튼을 눌러 먼저 입력해주세요.'); err.noKey = true; throw err; }
+  const sRes = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(q + ' 레시피 만들기')}&order=viewCount&type=video&maxResults=15&relevanceLanguage=ko&key=${key}`);
+  const sData = await sRes.json();
+  if(sData.error) throw new Error(sData.error.message || 'API 오류');
+  if(!sData.items || !sData.items.length) return [];
+  const ids = sData.items.map(i => i.id.videoId).join(',');
+  const vRes = await fetch(`https://www.googleapis.com/youtube/v3/videos?part=statistics,snippet&id=${ids}&key=${key}`);
+  const vData = await vRes.json();
+  if(vData.error) throw new Error(vData.error.message || 'API 오류');
+  const all = vData.items || [];
+  let list = all.filter(v => !NOT_RECIPE.test(v.snippet.title + ' ' + (v.snippet.tags || []).join(' ')));
+  if(!list.length) list = all;
+  list.sort((a, b) => (+b.statistics.viewCount || 0) - (+a.statistics.viewCount || 0));
+  return list.slice(0, 5).map(v => { v._prev = extractRuleBased(v.snippet.description || '', ''); return v; });
+}
 
-  const ids = searchData.items.map(i=>i.id.videoId).join(',');
-  const statsUrl = `https://www.googleapis.com/youtube/v3/videos?part=statistics,snippet&id=${ids}&key=${key}`;
-  const statsRes = await fetch(statsUrl);
-  const statsData = await statsRes.json();
-  if(statsData.error) throw new Error(statsData.error.message || 'API 오류');
-  if(!statsData.items || !statsData.items.length) return null;
-
-  // 먹방·ASMR 등 레시피가 아닌 영상은 빼고, 설명란에 레시피가 있는 영상을 우선
-  const NOT_RECIPE = /먹방|mukbang|asmr|eating\s?show|리액션|reaction|브이로그|vlog|챌린지|challenge|쇼츠|#shorts/i;
-  const views = v => parseInt(v.statistics.viewCount || 0, 10);
-  const scored = statsData.items
-    .filter(v => !NOT_RECIPE.test(v.snippet.title + ' ' + (v.snippet.tags || []).join(' ')))
-    .map(v => {
-      const r = extractRuleBased(v.snippet.description || '', '');
-      v._hasRecipe = r.ingredients.length >= 3;
-      return v;
-    });
-  const list = scored.length ? scored : statsData.items;
-  list.sort((a, b) => (b._hasRecipe - a._hasRecipe) || (views(b) - views(a)));
-  return list.slice(0, 6);
+let lastSearch = null; // { q, list }
+let currentView = 'search';
+const loadingSteps = ["유튜브에서 검색하는 중…","조회수 순으로 정렬하는 중…","레시피 있는지 살펴보는 중…"];
+function showEmpty(html){
+  $('result').classList.remove('show');
+  const el = $('empty'); el.classList.add('show');
+  el.innerHTML = '<span class="glyph">鍋</span><p>' + html + '</p>';
+}
+function showEmptyDefault(){
+  showEmpty(getApiKey() ? '요리 이름을 입력하면<br>유튜브 조회수 TOP 5 레시피 영상을 보여드려요.' : '먼저 오른쪽 위 ⚙ 버튼을 눌러 유튜브 API 키를 입력해주세요.');
 }
 
 function runSearch(q){
-  q = q.trim();
-  if(!q) return;
-  document.getElementById('empty').classList.remove('show');
-  document.getElementById('result').classList.remove('show');
-  const loading = document.getElementById('loading');
-  loading.classList.add('show');
-  let i=0;
-  const stepEl = document.getElementById('loadingStep');
-  stepEl.textContent = loadingSteps[0];
-  const iv = setInterval(()=>{
-    i = (i+1) % loadingSteps.length;
-    stepEl.textContent = loadingSteps[i];
-  }, 600);
-
-  ytSearch(q).then(list=>{
-    clearInterval(iv);
-    loading.classList.remove('show');
-    if(!list || !list.length){
-      showEmpty(`‘${q}’에 대한 영상을 찾지 못했어요. 다른 검색어로 시도해보세요.`);
-      return;
-    }
-    renderVideo(q, list[0], list);
-  }).catch(err=>{
-    clearInterval(iv);
-    loading.classList.remove('show');
-    if(err.noKey){
-      showEmpty(err.message);
-      openSettings();
-    } else {
-      showEmpty(`검색 중 문제가 생겼어요: ${err.message}<br>API 키 설정(사용 설정·리퍼러 제한)을 확인해주세요.`);
-    }
+  q = q.trim(); if(!q) return;
+  switchView('search');
+  $('searchInput').value = q;
+  $('empty').classList.remove('show'); $('result').classList.remove('show');
+  const loading = $('loading'); loading.classList.add('show');
+  let i = 0; $('loadingStep').textContent = loadingSteps[0];
+  const iv = setInterval(() => { i = (i + 1) % loadingSteps.length; $('loadingStep').textContent = loadingSteps[i]; }, 700);
+  ytSearch(q).then(list => {
+    clearInterval(iv); loading.classList.remove('show');
+    if(!list.length){ showEmpty(`‘${escapeHtml(q)}’ 영상을 찾지 못했어요. 다른 검색어로 시도해보세요.`); return; }
+    lastSearch = { q, list };
+    addChip(q);
+    renderTop5();
+  }).catch(err => {
+    clearInterval(iv); loading.classList.remove('show');
+    if(err.noKey){ showEmpty(err.message); openSettings(); }
+    else showEmpty(`검색 중 문제가 생겼어요: ${escapeHtml(err.message)}<br>API 키 설정(사용 설정·리퍼러 제한)을 확인해주세요.`);
   });
 }
 
-function showEmpty(html){
-  const empty = document.getElementById('empty');
-  empty.classList.add('show');
-  empty.innerHTML = '<span class="glyph">鍋</span><p>'+html+'</p>';
+function renderTop5(){
+  const { q, list } = lastSearch;
+  const rec = getRecipes();
+  const el = $('result');
+  $('empty').classList.remove('show');
+  el.innerHTML = `
+    <div class="list-head"><h2>‘${escapeHtml(q)}’ TOP ${list.length}</h2><span>유튜브 조회수 순 · 먹방 제외</span></div>
+    <p style="font-size:12.5px;color:var(--ink-muted);margin:0 0 4px;">원하는 영상을 고르면 재료와 조리 순서를 정리해서 바로 저장해요.</p>
+    ${list.map((v, i) => {
+      const p = v._prev, ok = p.ingredients.length >= 3;
+      return `<div class="vcard" data-i="${i}">
+        <div class="rank">${i + 1}</div>
+        <div class="vthumb" style="background-image:url('${v.snippet.thumbnails?.medium?.url || ''}')"></div>
+        <div class="vbody">
+          <div class="vtitle">${escapeHtml(v.snippet.title)}</div>
+          <div class="vsub">${escapeHtml(v.snippet.channelTitle)} · 조회수 ${fmtViews(v.statistics.viewCount)}회${rec[v.id] ? '<span class="tag">저장됨</span>' : ''}</div>
+          <div class="vprev ${ok ? 'ok' : 'no'}">${ok ? `✓ 설명란 레시피 · 재료 ${p.ingredients.length}개${p.steps.length ? ' · 단계 ' + p.steps.length + '개' : ''}` : '설명란에 레시피 없음 · AI/자막으로 정리'}</div>
+        </div>
+      </div>`; }).join('')}`;
+  el.classList.add('show');
+  el.querySelectorAll('.vcard').forEach(c => c.onclick = () => {
+    const v = list[+c.dataset.i];
+    const saved = getRecipes()[v.id];
+    if(saved){ addRecent(saved); renderDetail(saved, { from: 'top5', rank: +c.dataset.i + 1 }); }
+    else { const r = recipeFromVideo(q, v); addRecent(r); renderDetail(r, { from: 'top5', rank: +c.dataset.i + 1, autoRun: true }); }
+    window.scrollTo({ top: 0 });
+  });
 }
 
-const CATEGORIES = ["국/찌개","밥/죽","면","반찬","고기/구이","분식","디저트/간식","기타"];
-const SAVED_KEY = 'saved_recipes_v1';
-function getSavedMap(){ return JSON.parse(localStorage.getItem(SAVED_KEY) || '{}'); }
-function setSavedMap(map){ localStorage.setItem(SAVED_KEY, JSON.stringify(map)); }
-
-function renderVideo(q, video, candidates){
-  const resultEl = document.getElementById('result');
-  const thumb = video.snippet.thumbnails.medium?.url || video.snippet.thumbnails.default.url;
-  const views = fmtViews(video.statistics.viewCount);
-  const savedMap = getSavedMap();
-  const saved = savedMap[q] || null;
-
-  resultEl.innerHTML = `
-    <a class="video-ref" href="https://www.youtube.com/watch?v=${video.id}" target="_blank" rel="noopener" style="text-decoration:none;color:inherit;">
-      <div class="thumb" style="background-image:url('${thumb}');background-size:cover;background-position:center;"></div>
+// ---- 레시피 상세 ----
+function renderDetail(r, opts){
+  opts = opts || {};
+  switchView('search', true);
+  $('empty').classList.remove('show'); $('loading').classList.remove('show');
+  const el = $('result');
+  let isSaved = !!getRecipes()[r.id];
+  let target = r.servings || 2;
+  const backLabel = opts.from === 'top5' ? '← TOP 5 목록으로' : opts.from === 'saved' ? '← 저장한 레시피' : opts.from === 'recent' ? '← 최근 본 요리' : '';
+  el.innerHTML = `
+    ${backLabel ? `<button class="back-btn" id="backBtn">${backLabel}</button>` : ''}
+    <a class="video-ref" href="https://www.youtube.com/watch?v=${escapeHtml(r.videoId)}" target="_blank" rel="noopener" style="text-decoration:none;color:inherit;">
+      <div class="thumb" style="background-image:url('${escapeHtml(r.thumb)}');background-size:cover;background-position:center;"></div>
       <div class="video-meta">
-        <span class="badge-top">${candidates ? (candidates[0] === video ? (video._hasRecipe ? '레시피 있는 영상 중 조회수 1위' : '조회수 1위 레시피 영상') : '선택한 영상') : '저장한 영상'}</span>
-        <div class="vt">${escapeHtml(video.snippet.title)}</div>
-        <div class="vm">${escapeHtml(video.snippet.channelTitle)} · 조회수 ${views}회</div>
+        <span class="badge-top">${opts.rank ? `조회수 ${opts.rank}위 영상` : '유튜브에서 보기'}</span>
+        <div class="vt">${escapeHtml(r.title)}</div>
+        <div class="vm">${escapeHtml(r.channel)} · 조회수 ${fmtViews(r.views)}회</div>
       </div>
     </a>
-    ${candidates && candidates.length > 1 ? `
-    <details style="margin-top:8px;background:var(--card);border:1px solid var(--line);padding:10px 12px;">
-      <summary style="cursor:pointer;font-size:13px;color:var(--ink);">다른 레시피 영상 보기 (${candidates.length - 1}개)</summary>
-      ${candidates.filter(c => c !== video).map(c => `
-        <div class="alt-video" data-id="${c.id}" style="display:flex;gap:10px;align-items:center;padding:8px 0;border-top:1px solid var(--line);cursor:pointer;">
-          <div style="width:64px;height:46px;flex:none;border-radius:3px;background:url('${c.snippet.thumbnails.medium?.url || c.snippet.thumbnails.default.url}') center/cover;"></div>
-          <div style="min-width:0;">
-            <div style="font-size:12.5px;font-weight:600;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${escapeHtml(c.snippet.title)}</div>
-            <div style="font-size:11.5px;color:var(--ink-muted);margin-top:2px;">${escapeHtml(c.snippet.channelTitle)} · ${fmtViews(c.statistics.viewCount)}회${c._hasRecipe ? ' · <b style="color:var(--green)">설명란 레시피 있음</b>' : ''}</div>
-          </div>
-        </div>`).join('')}
-    </details>` : ''}
 
-    <h2 class="dish-name">${escapeHtml(q)}</h2>
-    <p class="dish-tagline">자동 정리를 누르면 영상 설명과 자막에서 재료와 조리 순서를 뽑아드려요.</p>
+    <div class="row" style="margin-top:18px;align-items:flex-end;">
+      <h2 class="dish-name grow" style="margin:0;">${escapeHtml(r.dish)}</h2>
+      <button class="btn ghost" id="favBtn" style="font-size:20px;padding:4px 10px;color:${r.favorite ? 'var(--accent)' : 'var(--line)'};" aria-label="즐겨찾기">★</button>
+    </div>
+    <div id="saveState" style="font-size:12.5px;color:var(--ink-muted);margin-top:4px;"></div>
+
+    <div class="row" style="margin-top:12px;">
+      <button class="btn green grow" id="cookBtn">🍳 요리 모드</button>
+      <button class="btn grow" id="shopBtn">🛒 장보기에 담기</button>
+    </div>
+
+    <div class="section-label">인분 조절</div>
+    <div class="serv">
+      이 레시피는 <input type="number" id="baseServ" min="1" max="50" value="${r.servings || 2}"> 인분 기준
+      <span style="flex-basis:100%;height:0;"></span>
+      만들 양 <span class="stepper"><button id="servMinus">−</button><b id="servTarget">${target}인분</b><button id="servPlus">＋</button></span>
+    </div>
+    <div class="scaled" id="scaledBox" style="display:none;"></div>
 
     <div class="section-label">자동 정리 <span class="count">무료</span></div>
     <details style="background:var(--card);border:1px solid var(--line);padding:10px 12px;font-size:13px;color:var(--ink-muted);line-height:1.6;">
       <summary style="cursor:pointer;color:var(--ink);">자막도 함께 넣기 (선택, 더 정확해져요)</summary>
-      유튜브 앱/웹에서 영상 설명의 <b>‘더보기 → 스크립트 표시’</b>를 눌러 자막을 전체 복사한 뒤 아래에 붙여넣으세요. 비워두면 영상 설명만으로 정리해요.
-      <textarea id="transcriptInput" rows="4" placeholder="자막을 여기에 붙여넣기" style="margin-top:8px;width:100%;padding:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font-family:'Noto Sans KR',sans-serif;font-size:13px;border-radius:2px;resize:vertical;"></textarea>
+      유튜브에서 영상 설명의 <b>‘더보기 → 스크립트 표시’</b>를 눌러 자막을 전체 복사한 뒤 아래에 붙여넣고 자동 정리를 다시 누르세요.
+      <textarea id="transcriptInput" rows="4" placeholder="자막을 여기에 붙여넣기" class="field" style="margin-top:8px;background:var(--bg);font-size:13px;resize:vertical;"></textarea>
     </details>
-    <button id="autoBtn" style="margin-top:10px;width:100%;background:var(--green);color:var(--card);border:none;padding:13px;font-size:14.5px;font-weight:600;border-radius:2px;cursor:pointer;">✨ 재료·조리순서 자동 정리</button>
+    <button id="autoBtn" class="btn green" style="margin-top:10px;width:100%;padding:13px;font-size:14.5px;">✨ 재료·조리순서 자동 정리</button>
     <div id="autoMsg" style="display:none;margin-top:8px;font-size:12.5px;line-height:1.6;"></div>
 
     <div class="section-label">분류</div>
-    <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-      <select id="categorySelect" style="flex:1;min-width:140px;padding:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:2px;font-size:14px;">
-        ${CATEGORIES.map(c=>`<option value="${c}" ${saved && saved.category===c ? 'selected':''}>${c}</option>`).join('')}
-      </select>
-      <label style="display:flex;align-items:center;gap:6px;font-size:13.5px;color:var(--ink-muted);white-space:nowrap;">
-        <input type="checkbox" id="favToggle" ${saved && saved.favorite ? 'checked':''}> ★ 즐겨찾기
-      </label>
-    </div>
+    <select id="categorySelect" class="field">${CATEGORIES.map(c => `<option ${r.category === c ? 'selected' : ''}>${c}</option>`).join('')}</select>
 
-    <div class="section-label">재료 입력 <span class="count">한 줄에 하나씩</span></div>
-    <textarea id="ingInput" rows="5" placeholder="예: 소갈비 1.2kg&#10;무 1/3개&#10;간장 6큰술" style="width:100%;padding:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-family:'Noto Sans KR',sans-serif;font-size:14px;border-radius:2px;resize:vertical;">${saved? escapeHtml(saved.ing) : ''}</textarea>
+    <div class="section-label">재료 <span class="count">한 줄에 하나씩</span></div>
+    <textarea id="ingInput" rows="6" placeholder="예: 소갈비 1.2kg&#10;무 1/3개&#10;간장 6큰술" class="field" style="resize:vertical;">${escapeHtml(r.ing)}</textarea>
 
-    <div class="section-label">조리 순서 입력 <span class="count">한 줄에 하나씩</span></div>
-    <textarea id="stepInput" rows="6" placeholder="예: 갈비 핏물 빼기&#10;끓는 물에 데치기&#10;양념장 만들어 재우기" style="width:100%;padding:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-family:'Noto Sans KR',sans-serif;font-size:14px;border-radius:2px;resize:vertical;">${saved? escapeHtml(saved.steps) : ''}</textarea>
+    <div class="section-label">조리 순서 <span class="count">한 줄에 하나씩</span></div>
+    <textarea id="stepInput" rows="7" placeholder="예: 갈비 핏물 빼기&#10;끓는 물에 데치기&#10;양념장 만들어 재우기" class="field" style="resize:vertical;">${escapeHtml(r.steps)}</textarea>
 
-    <button id="saveBtn" style="margin-top:16px;width:100%;background:var(--accent);color:var(--card);border:none;padding:13px;font-size:14.5px;font-weight:600;border-radius:2px;cursor:pointer;">이 브라우저에 저장</button>
-    <div id="savedMsg" style="display:none;margin-top:10px;font-size:12.5px;color:var(--green);">저장했어요. '저장한 레시피' 탭에서 확인할 수 있어요.</div>
+    <div id="tipsBox" class="tips" style="${r.tips ? '' : 'display:none;'}">${r.tips ? '<b>꿀팁 —</b> ' + escapeHtml(r.tips) : ''}</div>
 
-    <div id="tipsBox" class="tips" style="${saved && saved.tips ? '' : 'display:none;'}">${saved && saved.tips ? '<b>꿀팁 —</b> '+escapeHtml(saved.tips) : ''}</div>
+    <button id="saveBtn" class="btn primary" style="margin-top:16px;width:100%;padding:13px;font-size:14.5px;">저장</button>
+    <button id="delBtn" class="btn ghost" style="margin-top:8px;width:100%;color:var(--accent);${isSaved ? '' : 'display:none;'}">이 레시피 삭제</button>
 
-    <div class="disclaimer">※ 영상 정보(제목·채널·조회수)는 유튜브 데이터 API에서 실시간으로 가져와요. 자동 정리 결과는 영상 설명·자막을 자동으로 정리한 것이라 틀릴 수 있으니, 저장 전에 한 번 확인하고 고쳐주세요.</div>
-  `;
-  resultEl.classList.add('show');
+    <div class="disclaimer">※ 영상 정보는 유튜브 데이터 API에서 가져와요. 자동 정리 결과는 영상 설명·자막을 자동으로 정리한 것이라 틀릴 수 있으니 확인하고 고쳐주세요.</div>`;
+  el.classList.add('show');
 
-  document.querySelectorAll('.alt-video').forEach(el => {
-    el.onclick = () => {
-      const v = candidates.find(c => c.id === el.dataset.id);
-      if(v){ renderVideo(q, v, candidates); window.scrollTo({ top: 0, behavior: 'smooth' }); }
-    };
-  });
+  const ingEl = $('ingInput'), stepEl = $('stepInput');
+  const updState = () => { $('saveState').textContent = isSaved ? '✓ 저장한 레시피예요. 고친 뒤 저장을 누르면 반영돼요.' : '아직 저장 전이에요.'; $('delBtn').style.display = isSaved ? '' : 'none'; };
+  updState();
 
-  const description = video.snippet.description || '';
-  let currentTips = saved ? (saved.tips || '') : '';
-  document.getElementById('autoBtn').onclick = async ()=>{
-    const btn = document.getElementById('autoBtn');
-    const msg = document.getElementById('autoMsg');
-    const transcript = document.getElementById('transcriptInput').value.trim();
-    if(!description.trim() && !transcript){
-      msg.style.display='block'; msg.style.color='var(--accent)';
-      msg.textContent = '영상 설명이 비어 있어요. 자막을 붙여넣고 다시 눌러주세요.';
+  function collect(){
+    r.ing = ingEl.value; r.steps = stepEl.value; r.category = $('categorySelect').value;
+    r.servings = Math.max(1, parseInt($('baseServ').value, 10) || 2);
+    return r;
+  }
+  function save(silent){
+    const m = getRecipes(); collect(); r.savedAt = Date.now(); m[r.id] = r; setRecipes(m);
+    isSaved = true; updState(); addRecent(r);
+    if(!silent) toast('저장했어요');
+  }
+  function renderScaled(){
+    const base = Math.max(1, parseInt($('baseServ').value, 10) || 2);
+    $('servTarget').textContent = target + '인분';
+    const box = $('scaledBox'), f = target / base, ls = lines(ingEl.value);
+    if(f === 1 || !ls.length){ box.style.display = 'none'; return; }
+    box.style.display = '';
+    box.innerHTML = `<b>${target}인분 재료</b> (×${Math.round(f * 100) / 100})<br>` + ls.map(l => escapeHtml(scaleLine(l, f))).join('<br>');
+  }
+  const factor = () => target / Math.max(1, parseInt($('baseServ').value, 10) || 2);
+
+  if($('backBtn')) $('backBtn').onclick = () => {
+    if(opts.from === 'top5' && lastSearch){ renderTop5(); window.scrollTo({ top: 0 }); }
+    else switchView(opts.from);
+  };
+  $('favBtn').onclick = () => { r.favorite = !r.favorite; $('favBtn').style.color = r.favorite ? 'var(--accent)' : 'var(--line)'; save(true); toast(r.favorite ? '즐겨찾기에 넣었어요' : '즐겨찾기에서 뺐어요'); };
+  $('servMinus').onclick = () => { if(target > 1){ target--; renderScaled(); } };
+  $('servPlus').onclick = () => { if(target < 50){ target++; renderScaled(); } };
+  $('baseServ').oninput = renderScaled;
+  ingEl.oninput = renderScaled;
+  $('cookBtn').onclick = () => { collect(); if(!lines(r.steps).length){ toast('조리 순서가 비어 있어요'); return; } openCook(r, factor()); };
+  $('shopBtn').onclick = () => { collect(); if(!lines(r.ing).length){ toast('재료가 비어 있어요'); return; } const n = addToShopping(r, factor()); toast(`재료 ${n}개를 장보기에 담았어요 (${target}인분)`); };
+  $('saveBtn').onclick = () => save(false);
+  $('delBtn').onclick = () => {
+    if(!confirm('이 레시피를 삭제할까요?')) return;
+    const m = getRecipes(); delete m[r.id]; setRecipes(m); isSaved = false; updState(); toast('삭제했어요');
+  };
+
+  $('autoBtn').onclick = () => runAuto(false);
+  async function runAuto(auto){
+    const btn = $('autoBtn'), msg = $('autoMsg');
+    const transcript = $('transcriptInput').value.trim();
+    const say = (t, ok) => { msg.style.display = 'block'; msg.style.color = ok ? 'var(--green)' : 'var(--accent)'; msg.textContent = t; };
+    if(!r.description.trim() && !transcript){
+      say('영상 설명이 비어 있어요. 자막을 붙여넣고 자동 정리를 눌러주세요.', false);
+      if(auto){ save(true); }
       return;
     }
-    const ingEl = document.getElementById('ingInput');
-    const stepEl = document.getElementById('stepInput');
-    if((ingEl.value.trim() || stepEl.value.trim()) && !confirm('입력해 둔 재료·조리순서를 자동 정리 결과로 바꿀까요?')) return;
-    btn.disabled = true; btn.textContent = '정리하는 중…';
-    msg.style.display='none';
+    if(!auto && (ingEl.value.trim() || stepEl.value.trim()) && !confirm('입력해 둔 재료·조리순서를 자동 정리 결과로 바꿀까요?')) return;
+    btn.disabled = true; btn.textContent = '정리하는 중…'; msg.style.display = 'none';
     try{
-      const r = await summarizeRecipe(q, video.snippet.title, description, transcript);
-      const ings = (r.ingredients || []).map(x => Array.isArray(x) ? (x[0] + (x[1] ? ' ' + x[1] : '')) : String(x));
-      const steps = (r.steps || []).map(String);
+      const res = await summarizeRecipe(r.dish, r.title, r.description, transcript);
+      const ings = (res.ingredients || []).map(x => Array.isArray(x) ? (x[0] + (x[1] ? ' ' + x[1] : '')) : String(x));
+      const steps = (res.steps || []).map(String);
+      const notes = res.notes && res.notes.length ? ' (' + res.notes.join(' / ') + ')' : '';
       if(!ings.length && !steps.length){
-        msg.style.display='block'; msg.style.color='var(--accent)';
-        msg.textContent = (transcript ? '재료와 조리 순서를 찾지 못했어요.' : '영상 설명에 레시피가 없어요. 자막을 붙여넣고 다시 눌러주세요.')
-          + (r.method === 'AI 없이 자동 추출' && !getGeminiKey() ? ' ⚙ 설정에서 무료 Gemini 키를 넣으면 자막에서도 정리할 수 있어요.' : '')
-          + (r.notes && r.notes.length ? ' (' + r.notes.join(' / ') + ')' : '');
+        say((transcript ? '재료와 조리 순서를 찾지 못했어요.' : '영상 설명에 레시피가 없어요. 자막을 붙여넣고 다시 눌러주세요.')
+          + (!getGeminiKey() ? ' ⚙ 설정에서 무료 Gemini 키를 넣으면 자막에서도 정리할 수 있어요.' : '') + notes, false);
+        if(auto){ save(true); say($('autoMsg').textContent + ' 영상은 저장해 뒀어요.', false); }
       } else {
-        ingEl.value = ings.join('\n');
-        stepEl.value = steps.join('\n');
-        currentTips = r.tips || '';
-        const tb = document.getElementById('tipsBox');
-        tb.style.display = currentTips ? '' : 'none';
-        tb.innerHTML = currentTips ? '<b>꿀팁 —</b> ' + escapeHtml(currentTips) : '';
-        msg.style.display='block'; msg.style.color='var(--green)';
-        msg.textContent = `[${r.method}] 재료 ${ings.length}개, 조리 단계 ${steps.length}개를 정리했어요. 확인 후 저장해주세요.`
-          + (r.notes && r.notes.length ? ' (AI 호출 실패로 대신 추출: ' + r.notes.join(' / ') + ')' : '');
+        ingEl.value = ings.join('\n'); stepEl.value = steps.join('\n');
+        r.tips = res.tips || '';
+        if(res.servings && +res.servings > 0){ $('baseServ').value = Math.round(+res.servings); target = Math.round(+res.servings); }
+        const tb = $('tipsBox'); tb.style.display = r.tips ? '' : 'none'; tb.innerHTML = r.tips ? '<b>꿀팁 —</b> ' + escapeHtml(r.tips) : '';
+        renderScaled();
+        save(true);
+        say(`[${res.method}] 재료 ${ings.length}개, 조리 단계 ${steps.length}개를 정리해서 저장했어요. 틀린 곳은 고친 뒤 저장을 눌러주세요.` + (notes ? ' AI 대신 추출함' + notes : ''), true);
       }
     }catch(err){
-      msg.style.display='block'; msg.style.color='var(--accent)';
-      msg.textContent = '자동 정리 실패: ' + err.message;
-      if(err.noKey) openSettings();
+      say('자동 정리 실패: ' + err.message, false);
+      if(auto) save(true);
     }finally{
       btn.disabled = false; btn.textContent = '✨ 재료·조리순서 자동 정리';
     }
-  };
-
-  document.getElementById('saveBtn').onclick = ()=>{
-    const map = getSavedMap();
-    map[q] = {
-      ing: document.getElementById('ingInput').value,
-      steps: document.getElementById('stepInput').value,
-      category: document.getElementById('categorySelect').value,
-      favorite: document.getElementById('favToggle').checked,
-      tips: currentTips,
-      video: { title: video.snippet.title, channelTitle: video.snippet.channelTitle, thumb, videoId: video.id, views: video.statistics.viewCount, description },
-      savedAt: Date.now()
-    };
-    setSavedMap(map);
-    const msg = document.getElementById('savedMsg');
-    msg.style.display = 'block';
-    setTimeout(()=>{ msg.style.display='none'; }, 2500);
-  };
-}
-
-// 저장된 레시피를 API 재호출 없이 그대로 보여줄 때 사용
-function renderSavedEntry(q, entry){
-  document.getElementById('empty').classList.remove('show');
-  const fakeVideo = {
-    id: entry.video.videoId,
-    snippet: { title: entry.video.title, channelTitle: entry.video.channelTitle, description: entry.video.description || '', thumbnails: { medium: { url: entry.video.thumb } } },
-    statistics: { viewCount: entry.video.views }
-  };
-  renderVideo(q, fakeVideo);
-}
-
-// ---- 저장한 레시피 탭 ----
-function toggleFavorite(name, ev){
-  ev.stopPropagation();
-  const map = getSavedMap();
-  if(map[name]){ map[name].favorite = !map[name].favorite; setSavedMap(map); renderSavedView(); }
-}
-
-function openSavedRecipe(name){
-  const map = getSavedMap();
-  const entry = map[name];
-  if(!entry) return;
-  switchView('search');
-  renderSavedEntry(name, entry);
-}
-
-function renderSavedView(){
-  const favOnly = document.getElementById('favOnlyToggle').checked;
-  const map = getSavedMap();
-  const names = Object.keys(map).filter(n => !favOnly || map[n].favorite);
-  const listEl = document.getElementById('savedList');
-
-  if(!names.length){
-    listEl.innerHTML = `<div class="empty show" style="padding:40px 6px 10px;"><span class="glyph">鍋</span><p>${favOnly ? '즐겨찾기한 레시피가 아직 없어요.' : '아직 저장한 레시피가 없어요.<br>검색 후 저장 버튼을 눌러보세요.'}</p></div>`;
-    return;
   }
+  renderScaled();
+  if(opts.autoRun) runAuto(true);
+}
 
-  const byCat = {};
-  names.forEach(n=>{
-    const cat = map[n].category || '기타';
-    (byCat[cat] = byCat[cat] || []).push(n);
+// ---- 저장한 레시피 (+ 냉장고 재료로 찾기, 장보기 선택) ----
+let selectMode = false;
+const selected = new Set();
+let pantryQuery = '';
+function renderSaved(){
+  const map = getRecipes();
+  const favOnly = renderSaved.favOnly || false;
+  let items = Object.values(map).filter(r => !favOnly || r.favorite);
+  const total = Object.keys(map).length;
+  const terms = pantryQuery.split(/[,，\s]+/).map(s => s.trim()).filter(Boolean);
+  let bodyHtml = '';
+  const card = (r, extra) => `
+    <div class="vcard" data-id="${escapeHtml(r.id)}">
+      ${selectMode ? `<input type="checkbox" class="chk" ${selected.has(r.id) ? 'checked' : ''}>` : ''}
+      <div class="vthumb" style="width:76px;height:56px;background-image:url('${escapeHtml(r.thumb)}')"></div>
+      <div class="vbody">
+        <div class="vtitle">${escapeHtml(r.dish)} <span style="font-weight:400;color:var(--ink-muted);font-size:12px;">· ${escapeHtml(r.channel)}</span></div>
+        <div class="vsub">재료 ${lines(r.ing).length}개 · 단계 ${lines(r.steps).length}개 · ${r.servings || 2}인분</div>
+        ${extra || ''}
+      </div>
+      ${selectMode ? '' : `<button class="star" style="background:none;border:none;font-size:20px;cursor:pointer;color:${r.favorite ? 'var(--accent)' : 'var(--line)'};">★</button>`}
+    </div>`;
+  if(!items.length){
+    bodyHtml = `<div class="empty show" style="padding:40px 6px 10px;"><span class="glyph">札</span><p>${favOnly ? '즐겨찾기한 레시피가 아직 없어요.' : '아직 저장한 레시피가 없어요.<br>검색해서 TOP 5 중 하나를 골라보세요.'}</p></div>`;
+  } else if(terms.length){
+    const scored = items.map(r => {
+      const ls = lines(r.ing);
+      const have = ls.filter(l => terms.some(t => l.replace(/\s/g,'').includes(t)));
+      return { r, have: have.length, total: ls.length, missing: ls.filter(l => !have.includes(l)).map(l => splitNameQty(l).name) };
+    }).filter(x => x.have > 0).sort((a, b) => (b.have / b.total) - (a.have / a.total) || b.have - a.have);
+    bodyHtml = scored.length ? `<div class="section-label" style="margin-top:14px;">만들 수 있는 순 <span class="count">${scored.length}개</span></div>` + scored.map(x => card(x.r,
+      `<div class="vprev ok">재료 ${x.total}개 중 ${x.have}개 있음</div>${x.missing.length ? `<div class="vsub">부족: ${escapeHtml(x.missing.slice(0, 6).join(', '))}${x.missing.length > 6 ? ' 외 ' + (x.missing.length - 6) + '개' : ''}</div>` : '<div class="vprev ok">재료 다 있어요!</div>'}`)).join('')
+      : `<div class="empty show" style="padding:30px 6px;"><p>‘${escapeHtml(terms.join(', '))}’가 들어간 저장 레시피가 없어요.</p></div>`;
+  } else {
+    const byCat = {};
+    items.sort((a, b) => (b.favorite - a.favorite) || (b.savedAt - a.savedAt)).forEach(r => (byCat[r.category || '기타'] = byCat[r.category || '기타'] || []).push(r));
+    bodyHtml = CATEGORIES.filter(c => byCat[c]).map(c => `<div class="section-label" style="margin-top:20px;">${c} <span class="count">${byCat[c].length}개</span></div>` + byCat[c].map(r => card(r)).join('')).join('');
+  }
+  $('view-saved').innerHTML = `
+    <div class="list-head"><h2>${selectMode ? '장보기에 담을 레시피 선택' : '저장한 레시피'}</h2><span>${total}개</span></div>
+    ${selectMode ? `<button class="back-btn" id="selCancel">← 선택 취소</button>` : `
+    <div class="row" style="margin:6px 0;">
+      <input id="pantryInput" class="field grow" placeholder="🧊 냉장고 재료로 찾기 (예: 김치, 두부, 돼지고기)" value="${escapeHtml(pantryQuery)}" autocomplete="off">
+    </div>
+    <div class="row" style="justify-content:space-between;">
+      <label style="display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--ink-muted);"><input type="checkbox" id="favOnlyToggle" ${favOnly ? 'checked' : ''}> 즐겨찾기만</label>
+      <button class="btn ghost" id="selStart" style="font-size:12.5px;padding:6px 10px;">🛒 여러 개 골라 장보기</button>
+    </div>`}
+    ${bodyHtml}
+    ${selectMode ? `<div class="selbar"><span>${selected.size}개 선택</span><button id="selDone" ${selected.size ? '' : 'disabled'}>장보기에 담기</button></div>` : ''}`;
+
+  if(selectMode){
+    $('selCancel').onclick = () => { selectMode = false; selected.clear(); renderSaved(); };
+    $('selDone').onclick = () => {
+      const m = getRecipes(); let n = 0; selected.forEach(id => { if(m[id]) n += addToShopping(m[id], 1); });
+      toast(`레시피 ${selected.size}개의 재료 ${n}개를 담았어요`); selectMode = false; selected.clear(); switchView('shop');
+    };
+  } else {
+    const pi = $('pantryInput');
+    pi.oninput = () => { pantryQuery = pi.value; clearTimeout(renderSaved._t); renderSaved._t = setTimeout(() => { renderSaved(); const p = $('pantryInput'); p.focus(); p.setSelectionRange(p.value.length, p.value.length); }, 350); };
+    $('favOnlyToggle').onchange = e => { renderSaved.favOnly = e.target.checked; renderSaved(); };
+    $('selStart').onclick = () => { selectMode = true; selected.clear(); renderSaved(); };
+  }
+  document.querySelectorAll('#view-saved .vcard').forEach(c => {
+    const id = c.dataset.id;
+    c.onclick = e => {
+      if(selectMode){ if(selected.has(id)) selected.delete(id); else selected.add(id); renderSaved(); return; }
+      if(e.target.classList.contains('star')){ const m = getRecipes(); m[id].favorite = !m[id].favorite; setRecipes(m); renderSaved(); return; }
+      const r = getRecipes()[id]; if(r){ addRecent(r); renderDetail(r, { from: 'saved' }); window.scrollTo({ top: 0 }); }
+    };
   });
-  Object.values(byCat).forEach(arr=> arr.sort((a,b)=> (map[b].favorite - map[a].favorite) || (map[b].savedAt - map[a].savedAt)));
+}
 
-  const orderedCats = CATEGORIES.filter(c => byCat[c]);
-  listEl.innerHTML = orderedCats.map(cat => `
-    <div class="section-label" style="margin-top:22px;">${cat} <span class="count">${byCat[cat].length}개</span></div>
-    ${byCat[cat].map(name => {
-      const e = map[name];
-      return `
-      <div class="video-ref" style="cursor:pointer;" onclick="openSavedRecipe('${name.replace(/'/g,"\\'")}')">
-        <div class="thumb" style="background-image:url('${e.video.thumb}');background-size:cover;background-position:center;"></div>
-        <div class="video-meta" style="flex:1;">
-          <div class="vt">${escapeHtml(name)}</div>
-          <div class="vm">재료 ${e.ing.split('\n').filter(Boolean).length}개 · 단계 ${e.steps.split('\n').filter(Boolean).length}개</div>
+// ---- 최근 본 요리 ----
+function renderRecent(){
+  const list = LS.get(K_RECENT, []), rec = getRecipes();
+  $('view-recent').innerHTML = `
+    <div class="list-head"><h2>최근 본 요리</h2>${list.length ? '<button class="btn ghost" id="recentClear" style="font-size:12px;padding:5px 9px;">기록 지우기</button>' : ''}</div>
+    ${list.length ? list.map((x, i) => `
+      <div class="vcard" data-i="${i}">
+        <div class="vthumb" style="width:76px;height:56px;background-image:url('${escapeHtml(x.thumb)}')"></div>
+        <div class="vbody">
+          <div class="vtitle">${escapeHtml(x.dish)}${rec[x.id] ? '<span class="tag">저장됨</span>' : ''}</div>
+          <div class="vsub" style="display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden;">${escapeHtml(x.title)}</div>
+          <div class="vsub">${escapeHtml(x.channel)} · ${timeAgo(x.at)}</div>
         </div>
-        <button onclick="toggleFavorite('${name.replace(/'/g,"\\'")}', event)" style="background:none;border:none;font-size:20px;cursor:pointer;color:${e.favorite ? 'var(--accent)':'var(--line)'};">★</button>
-      </div>`;
-    }).join('')}
-  `).join('');
+      </div>`).join('') : `<div class="empty show" style="padding:40px 6px;"><span class="glyph">歴</span><p>아직 본 요리가 없어요.</p></div>`}`;
+  if($('recentClear')) $('recentClear').onclick = () => { if(confirm('최근 본 기록을 지울까요? (저장한 레시피는 그대로예요)')){ LS.set(K_RECENT, []); renderRecent(); } };
+  document.querySelectorAll('#view-recent .vcard').forEach(c => c.onclick = () => {
+    const x = list[+c.dataset.i];
+    const r = getRecipes()[x.id] || { id: x.id, dish: x.dish, videoId: x.videoId, title: x.title, channel: x.channel, thumb: x.thumb, views: x.views,
+      description: x.description || '', ing: '', steps: '', tips: '', category: guessCategory(x.dish), favorite: false, servings: 2, savedAt: 0 };
+    addRecent(r); renderDetail(r, { from: 'recent' }); window.scrollTo({ top: 0 });
+  });
 }
 
-document.getElementById('favOnlyToggle').addEventListener('change', renderSavedView);
-
-// ---- 탭 전환 ----
-function switchView(name){
-  document.querySelectorAll('footer.tab .t').forEach(t=> t.classList.toggle('on', t.dataset.view===name));
-  document.getElementById('view-search').style.display = name==='search' ? '' : 'none';
-  document.getElementById('view-saved').style.display = name==='saved' ? '' : 'none';
-  if(name==='saved') renderSavedView();
+// ---- 요리 모드 ----
+let cook = { r: null, i: 0, steps: [], factor: 1 };
+let wakeLock = null, timerIv = null, timerEnd = 0, audioCtx = null;
+async function keepAwake(on){
+  try{ if(window.AndroidBridge && AndroidBridge.keepScreenOn) AndroidBridge.keepScreenOn(on); }catch(e){}
+  try{
+    if(on && 'wakeLock' in navigator){ wakeLock = await navigator.wakeLock.request('screen'); }
+    else if(!on && wakeLock){ wakeLock.release(); wakeLock = null; }
+  }catch(e){}
 }
-document.querySelectorAll('footer.tab .t').forEach(t=>{
-  t.addEventListener('click', ()=> switchView(t.dataset.view));
-});
-
-function escapeHtml(s){
-  return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'visible' && $('cook').classList.contains('show')) keepAwake(true); });
+function openCook(r, factor){
+  cook = { r, i: 0, steps: lines(r.steps), factor };
+  $('cookTitle').textContent = r.dish;
+  $('cookIng').innerHTML = `<b style="color:var(--green);">재료 (${Math.round((r.servings || 2) * factor)}인분)</b><br>` + lines(r.ing).map(l => escapeHtml(scaleLine(l, factor))).join('<br>');
+  $('cookIng').classList.remove('show');
+  $('cook').classList.add('show');
+  document.body.style.overflow = 'hidden';
+  keepAwake(true);
+  showCookStep();
+}
+function showCookStep(){
+  const { i, steps } = cook;
+  $('cookNum').textContent = `${i + 1} / ${steps.length} 단계`;
+  $('cookText').textContent = steps[i];
+  $('cookPrev').disabled = i === 0;
+  $('cookNext').textContent = i === steps.length - 1 ? '완료 ✓' : '다음 ▶';
+  const found = [], re = /(\d+)\s*(시간|분|초)/g; let m;
+  while((m = re.exec(steps[i]))){ const sec = (+m[1]) * (m[2] === '시간' ? 3600 : m[2] === '분' ? 60 : 1); if(sec > 0 && sec <= 6 * 3600 && !found.some(f => f.sec === sec)) found.push({ sec, label: m[0] }); }
+  $('cookTimers').innerHTML = found.map(f => `<button class="btn green timer-btn" data-sec="${f.sec}">⏱ ${escapeHtml(f.label)} 타이머</button>`).join('');
+  $('cookTimers').querySelectorAll('button').forEach(b => b.onclick = () => startTimer(+b.dataset.sec, b.textContent.replace('⏱ ', '').replace(' 타이머', '')));
+}
+function beep(){
+  try{
+    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+    [0, 0.35, 0.7].forEach(t => { const o = audioCtx.createOscillator(), g = audioCtx.createGain(); o.frequency.value = 880; o.connect(g); g.connect(audioCtx.destination); g.gain.value = 0.25; o.start(audioCtx.currentTime + t); o.stop(audioCtx.currentTime + t + 0.22); });
+  }catch(e){}
+  try{ navigator.vibrate && navigator.vibrate([400, 200, 400, 200, 400]); }catch(e){}
+}
+function startTimer(sec, label){
+  try{ audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)(); audioCtx.resume && audioCtx.resume(); }catch(e){}
+  clearInterval(timerIv);
+  timerEnd = Date.now() + sec * 1000;
+  const bar = $('timerBar'); bar.classList.add('show'); bar.classList.remove('ring');
+  const tick = () => {
+    const left = Math.max(0, Math.round((timerEnd - Date.now()) / 1000));
+    const h = Math.floor(left / 3600), mi = Math.floor(left % 3600 / 60), s = left % 60;
+    $('timerText').textContent = `⏱ ${label} · ${h ? h + ':' : ''}${String(mi).padStart(h ? 2 : 1, '0')}:${String(s).padStart(2, '0')} 남음`;
+    if(left <= 0){
+      clearInterval(timerIv); bar.classList.add('ring'); $('timerText').textContent = `⏰ ${label} 끝났어요!`;
+      beep(); timerIv = setInterval(beep, 3000);
+    }
+  };
+  tick(); timerIv = setInterval(tick, 1000);
+  toast(`${label} 타이머 시작`);
+}
+$('timerStop').onclick = () => { clearInterval(timerIv); $('timerBar').classList.remove('show', 'ring'); };
+$('cookPrev').onclick = () => { if(cook.i > 0){ cook.i--; showCookStep(); } };
+$('cookNext').onclick = () => { if(cook.i < cook.steps.length - 1){ cook.i++; showCookStep(); } else { closeCook(); toast('요리 완성! 맛있게 드세요 🍚'); } };
+$('cookIngBtn').onclick = () => $('cookIng').classList.toggle('show');
+$('cookClose').onclick = closeCook;
+function closeCook(){
+  $('cook').classList.remove('show'); document.body.style.overflow = '';
+  keepAwake(false); clearInterval(timerIv); $('timerBar').classList.remove('show', 'ring');
 }
 
-document.getElementById('searchForm').addEventListener('submit', e=>{
-  e.preventDefault();
-  runSearch(document.getElementById('searchInput').value);
-});
-
-if(!getApiKey()){
-  showEmpty('먼저 오른쪽 위 ⚙ 버튼을 눌러 유튜브 API 키를 입력해주세요.');
+// ---- 화면 전환 ----
+function switchView(name, keepResult){
+  currentView = name;
+  document.querySelectorAll('footer.tab .t').forEach(t => t.classList.toggle('on', t.dataset.view === name));
+  ['search','saved','shop','recent'].forEach(v => $('view-' + v).style.display = v === name ? '' : 'none');
+  $('searchArea').style.display = name === 'search' ? '' : 'none';
+  document.querySelectorAll('header.top .title, header.top .sub').forEach(e => e.style.display = name === 'search' ? '' : 'none');
+  if(name === 'saved') renderSaved();
+  if(name === 'shop') renderShop();
+  if(name === 'recent') renderRecent();
+  if(name !== 'saved' && selectMode && name !== 'search'){ /* 유지 */ }
 }
+document.querySelectorAll('footer.tab .t').forEach(t => t.addEventListener('click', () => {
+  if(t.dataset.view === 'search' && currentView === 'search' && lastSearch && $('result').classList.contains('show') && !$('result').querySelector('.list-head')){ renderTop5(); return; }
+  if(t.dataset.view !== 'saved') selectMode = false;
+  switchView(t.dataset.view); window.scrollTo({ top: 0 });
+}));
+
+// ---- 검색창·추천 칩 ----
+const DEFAULT_CHIPS = ['김치찌개','된장찌개','제육볶음','소갈비찜','계란말이','떡볶이'];
+function addChip(q){
+  let c = LS.get('search_history', []).filter(x => x !== q); c.unshift(q); LS.set('search_history', c.slice(0, 8)); renderChips();
+}
+function renderChips(){
+  const hist = LS.get('search_history', []);
+  const chips = hist.length ? hist : DEFAULT_CHIPS;
+  $('chips').innerHTML = chips.map(n => `<div class="chip">${escapeHtml(n)}</div>`).join('');
+  $('chips').querySelectorAll('.chip').forEach((c, i) => c.onclick = () => runSearch(chips[i]));
+}
+$('searchForm').addEventListener('submit', e => { e.preventDefault(); runSearch($('searchInput').value); });
+
+renderChips();
+showEmptyDefault();
 </script>
 </body>
 </html>
