@@ -418,8 +418,10 @@
     <h3 style="font-family:'Song Myung',serif;font-weight:400;font-size:20px;margin:0 0 6px;">유튜브 API 키 설정</h3>
     <p style="font-size:13px;color:var(--ink-muted);line-height:1.6;margin:0 0 16px;">이 기기의 브라우저에만 저장돼요. 다른 사람과 파일을 공유해도 키는 같이 전달되지 않아요.</p>
     <input id="apiKeyInput" type="password" placeholder="AIza… 로 시작하는 키" style="width:100%;padding:11px;border:1px solid var(--line);border-radius:2px;font-size:14px;background:var(--bg);color:var(--ink);margin-bottom:8px;" autocomplete="off">
-    <h3 style="font-family:'Song Myung',serif;font-weight:400;font-size:17px;margin:14px 0 6px;">Claude API 키 (자동 정리용)</h3>
-    <p style="font-size:12.5px;color:var(--ink-muted);line-height:1.6;margin:0 0 10px;">영상 설명·자막에서 재료와 조리 순서를 자동으로 뽑을 때 써요. console.anthropic.com에서 발급받을 수 있어요.</p>
+    <h3 style="font-family:'Song Myung',serif;font-weight:400;font-size:17px;margin:14px 0 6px;">Gemini API 키 (무료 · 추천)</h3>
+    <p style="font-size:12.5px;color:var(--ink-muted);line-height:1.6;margin:0 0 10px;">자동 정리에 써요. aistudio.google.com 에서 구글 계정으로 무료 발급 (카드 등록 불필요). 키가 없어도 AI 없이 무료 자동 추출은 돼요.</p>
+    <input id="geminiKeyInput" type="password" placeholder="AIza… 로 시작하는 키" style="width:100%;padding:11px;border:1px solid var(--line);border-radius:2px;font-size:14px;background:var(--bg);color:var(--ink);margin-bottom:8px;" autocomplete="off">
+    <h3 style="font-family:'Song Myung',serif;font-weight:400;font-size:15px;margin:12px 0 6px;color:var(--ink-muted);">Claude API 키 (선택 · 유료)</h3>
     <input id="claudeKeyInput" type="password" placeholder="sk-ant-… 로 시작하는 키" style="width:100%;padding:11px;border:1px solid var(--line);border-radius:2px;font-size:14px;background:var(--bg);color:var(--ink);margin-bottom:8px;" autocomplete="off">
     <label style="display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--ink-muted);margin-bottom:16px;">
       <input type="checkbox" id="showKeyToggle"> 입력한 키 표시
@@ -509,14 +511,18 @@ const YT_KEY_STORAGE = 'yt_api_key';
 function getApiKey(){ return localStorage.getItem(YT_KEY_STORAGE) || ''; }
 const CLAUDE_KEY_STORAGE = 'claude_api_key';
 function getClaudeKey(){ return localStorage.getItem(CLAUDE_KEY_STORAGE) || ''; }
+const GEMINI_KEY_STORAGE = 'gemini_api_key';
+function getGeminiKey(){ return localStorage.getItem(GEMINI_KEY_STORAGE) || ''; }
 
 // ---- 설정창 ----
 const settingsOverlay = document.getElementById('settingsOverlay');
 const apiKeyInput = document.getElementById('apiKeyInput');
 const claudeKeyInput = document.getElementById('claudeKeyInput');
+const geminiKeyInput = document.getElementById('geminiKeyInput');
 function openSettings(){
   apiKeyInput.value = getApiKey();
   claudeKeyInput.value = getClaudeKey();
+  geminiKeyInput.value = getGeminiKey();
   settingsOverlay.style.display = 'flex';
 }
 function closeSettings(){ settingsOverlay.style.display = 'none'; }
@@ -525,6 +531,7 @@ document.getElementById('settingsCancel').onclick = closeSettings;
 document.getElementById('showKeyToggle').onchange = (e)=>{
   apiKeyInput.type = e.target.checked ? 'text' : 'password';
   claudeKeyInput.type = e.target.checked ? 'text' : 'password';
+  geminiKeyInput.type = e.target.checked ? 'text' : 'password';
 };
 document.getElementById('settingsSave').onclick = ()=>{
   const v = apiKeyInput.value.trim();
@@ -533,18 +540,16 @@ document.getElementById('settingsSave').onclick = ()=>{
   const c = claudeKeyInput.value.trim();
   if(c) localStorage.setItem(CLAUDE_KEY_STORAGE, c);
   else localStorage.removeItem(CLAUDE_KEY_STORAGE);
+  const g = geminiKeyInput.value.trim();
+  if(g) localStorage.setItem(GEMINI_KEY_STORAGE, g);
+  else localStorage.removeItem(GEMINI_KEY_STORAGE);
   closeSettings();
 };
 
-// ---- Claude API로 재료/조리순서 자동 정리 ----
-async function summarizeRecipe(dish, title, text){
-  const key = getClaudeKey();
-  if(!key){
-    const err = new Error('Claude API 키가 없어요. ⚙ 버튼에서 먼저 입력해주세요.');
-    err.noKey = true;
-    throw err;
-  }
-  const prompt = `아래는 유튜브 요리 영상 "${title}"의 설명과 자막이에요. 요리 이름: ${dish}
+// ---- 재료/조리순서 자동 정리 ----
+// 순서: Gemini(무료) → Claude(유료, 키가 있을 때만) → AI 없이 규칙 기반 추출
+function buildPrompt(dish, title, text){
+  return `아래는 유튜브 요리 영상 "${title}"의 설명과 자막이에요. 요리 이름: ${dish}
 
 이 텍스트에서 재료와 조리 순서를 뽑아 JSON으로만 답하세요. 다른 말은 쓰지 마세요.
 형식: {"ingredients":[["재료명","양"]],"steps":["조리 단계"],"tips":"팁 한두 문장 또는 빈 문자열"}
@@ -556,26 +561,118 @@ async function summarizeRecipe(dish, title, text){
 <text>
 ${text.slice(0, 60000)}
 </text>`;
+}
+function parseJsonOut(out){
+  const m = (out || '').match(/\{[\s\S]*\}/);
+  if(!m) throw new Error('응답을 해석하지 못했어요.');
+  return JSON.parse(m[0]);
+}
+
+const GEMINI_MODELS = ['gemini-flash-latest', 'gemini-2.5-flash', 'gemini-flash-lite-latest', 'gemini-2.5-flash-lite'];
+async function summarizeWithGemini(prompt){
+  const key = getGeminiKey();
+  let lastErr = null;
+  for(const model of GEMINI_MODELS){
+    try{
+      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'x-goog-api-key': key },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: { responseMimeType: 'application/json', temperature: 0.2 }
+        })
+      });
+      const data = await res.json();
+      if(data.error){
+        lastErr = new Error(data.error.message || ('Gemini 오류 ' + res.status));
+        lastErr.status = res.status;
+        // 모델 없음(404)·한도 초과(429)면 다음 모델로, 키 문제(400/403)면 중단
+        if(res.status === 404 || res.status === 429 || res.status >= 500) continue;
+        throw lastErr;
+      }
+      const out = (data.candidates?.[0]?.content?.parts || []).map(p => p.text || '').join('');
+      return parseJsonOut(out);
+    }catch(e){
+      lastErr = e;
+      if(e.status && (e.status === 400 || e.status === 403)) throw e;
+    }
+  }
+  throw lastErr || new Error('Gemini 호출 실패');
+}
+
+async function summarizeWithClaude(prompt){
   const res = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: {
       'content-type': 'application/json',
-      'x-api-key': key,
+      'x-api-key': getClaudeKey(),
       'anthropic-version': '2023-06-01',
       'anthropic-dangerous-direct-browser-access': 'true'
     },
-    body: JSON.stringify({
-      model: 'claude-haiku-5-5',
-      max_tokens: 2000,
-      messages: [{ role: 'user', content: prompt }]
-    })
+    body: JSON.stringify({ model: 'claude-haiku-5-5', max_tokens: 2000, messages: [{ role: 'user', content: prompt }] })
   });
   const data = await res.json();
   if(data.error) throw new Error(data.error.message || 'Claude API 오류');
-  const out = (data.content || []).map(b => b.text || '').join('');
-  const m = out.match(/\{[\s\S]*\}/);
-  if(!m) throw new Error('응답을 해석하지 못했어요. 다시 시도해주세요.');
-  return JSON.parse(m[0]);
+  return parseJsonOut((data.content || []).map(b => b.text || '').join(''));
+}
+
+// AI 없이: 영상 설명란의 패턴으로 재료·순서 추출 (완전 무료, 횟수 제한 없음)
+function extractRuleBased(description, transcript){
+  const QTY = /(\d+(?:[.\/]\d+)?|반|한|두|세|네|약간|적당량|조금|한줌|한꼬집)\s*(kg|g|mg|ml|mL|L|l|cc|큰술|작은술|숟가락|스푼|티스푼|컵|종이컵|개|대|줌|꼬집|모|포기|쪽|장|마리|팩|봉지|봉|알|톨|뿌리|송이|단|근|T|t|Ts|ts|tbsp|tsp|cup|인분)?/;
+  const UNIT = /\d\s*(kg|g|ml|mL|L|cc|큰술|작은술|숟가락|스푼|컵|개|대|줌|꼬집|모|포기|쪽|장|마리|팩|봉지|봉|알|톨|뿌리|송이|단|T|t|tbsp|tsp)(?![a-zA-Z가-힣])|약간|적당량|한\s?줌|한\s?꼬집/;
+  const ING_HEAD = /^[\[\(【<〈「#*\s]*(재료|주재료|부재료|양념|양념장|소스|ingredients?)\b|^[\[\(【<〈「#*\s]*(재료|양념|소스)/i;
+  const STEP_HEAD = /^[\[\(【<〈「#*\s]*(만드는\s?법|만드는\s?방법|조리\s?법|조리\s?순서|조리\s?방법|레시피\s?순서|요리\s?순서|how\s?to|directions|instructions|method)/i;
+  const STOP = /(http|www\.|instagram|인스타|구독|좋아요|문의|협찬|광고|비즈니스|business|e-?mail|이메일|#|촬영|편집|bgm|음악|music|copyright|채널)/i;
+  const clean = l => l.replace(/^[\s\-•·▶►▷✔✓☑★☆✅⭐️🔸🔹●○◆◇■□※>*]+/u, '').replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/gu, '').trim();
+  const lines = (description || '').split(/\r?\n/).map(l => l.trim());
+
+  const ingredients = [], steps = [];
+  let mode = null;
+  for(const raw of lines){
+    if(!raw){ continue; }
+    const l = clean(raw);
+    if(!l) continue;
+    if(STEP_HEAD.test(l)){ mode = 'step'; const rest = l.replace(STEP_HEAD,'').replace(/^[\]\)】>〉」:：\s]+/,''); if(rest.length > 3) steps.push(rest); continue; }
+    if(ING_HEAD.test(l) && l.length < 30){ mode = 'ing'; const rest = l.replace(ING_HEAD,'').replace(/^[\]\)】>〉」:：\s]+/,''); if(rest) pushIng(rest); continue; }
+    if(STOP.test(l)){ if(mode) mode = null; continue; }
+    // 타임스탬프 챕터 (예: 01:23 양파 볶기) → 조리 단계
+    const ts = l.match(/^(\d{1,2}:)?\d{1,2}:\d{2}\s+(.+)$/);
+    if(ts){ const t = ts[2].trim(); if(!/^(인트로|intro|outro|아웃트로|시식|먹방|완성|마무리 인사)/i.test(t)) steps.push(t); continue; }
+    const numbered = l.match(/^(\d{1,2}[.)]|[①-⑳]|step\s?\d+[.:)]?)\s*(.+)$/i);
+    if(mode === 'step'){ steps.push(numbered ? numbered[2] : l); continue; }
+    if(numbered && numbered[2].length > 8 && !UNIT.test(numbered[2].slice(0,15))){ steps.push(numbered[2]); continue; }
+    if(mode === 'ing'){ if(l.length <= 60) pushIng(l); else mode = null; continue; }
+    if(UNIT.test(l) && l.length <= 50) pushIng(l);
+  }
+  function pushIng(l){
+    // "양파 1개, 대파 1대" 처럼 한 줄에 여러 개면 나눔
+    const parts = l.split(/\s*[,，\/|]\s*(?=[가-힣a-zA-Z])|(?<=\d\s*(?:kg|g|ml|mL|L|cc|큰술|작은술|스푼|컵|개|대|모|포기|쪽|장|마리|알|톨|T|t))\s+(?=[가-힣])/);
+    parts.forEach(p => { p = p.trim(); if(p && p.length <= 40 && !ingredients.includes(p)) ingredients.push(p); });
+  }
+
+  // 자막에 번호 매긴 단계가 있으면 보조로 사용
+  if(!steps.length && transcript){
+    transcript.split(/\r?\n/).forEach(t => {
+      const m = clean(t).match(/^(\d{1,2}[.)]|[①-⑳])\s*(.{6,})$/);
+      if(m) steps.push(m[2]);
+    });
+  }
+  return { ingredients: ingredients.map(x => [x, '']), steps, tips: '' };
+}
+
+async function summarizeRecipe(dish, title, description, transcript){
+  const text = `[영상 설명]\n${description}\n\n[자막]\n${transcript || '(없음)'}`;
+  const prompt = buildPrompt(dish, title, text);
+  const notes = [];
+  if(getGeminiKey()){
+    try{ return { ...(await summarizeWithGemini(prompt)), method: 'Gemini(무료)' }; }
+    catch(e){ notes.push('Gemini: ' + e.message); }
+  }
+  if(getClaudeKey()){
+    try{ return { ...(await summarizeWithClaude(prompt)), method: 'Claude' }; }
+    catch(e){ notes.push('Claude: ' + e.message); }
+  }
+  return { ...extractRuleBased(description, transcript), method: 'AI 없이 자동 추출', notes };
 }
 settingsOverlay.addEventListener('click', (e)=>{ if(e.target === settingsOverlay) closeSettings(); });
 
@@ -686,7 +783,7 @@ function renderVideo(q, video){
     <h2 class="dish-name">${escapeHtml(q)}</h2>
     <p class="dish-tagline">자동 정리를 누르면 영상 설명과 자막에서 재료와 조리 순서를 뽑아드려요.</p>
 
-    <div class="section-label">자동 정리 <span class="count">Claude AI</span></div>
+    <div class="section-label">자동 정리 <span class="count">무료</span></div>
     <details style="background:var(--card);border:1px solid var(--line);padding:10px 12px;font-size:13px;color:var(--ink-muted);line-height:1.6;">
       <summary style="cursor:pointer;color:var(--ink);">자막도 함께 넣기 (선택, 더 정확해져요)</summary>
       유튜브 앱/웹에서 영상 설명의 <b>‘더보기 → 스크립트 표시’</b>를 눌러 자막을 전체 복사한 뒤 아래에 붙여넣으세요. 비워두면 영상 설명만으로 정리해요.
@@ -716,7 +813,7 @@ function renderVideo(q, video){
 
     <div id="tipsBox" class="tips" style="${saved && saved.tips ? '' : 'display:none;'}">${saved && saved.tips ? '<b>꿀팁 —</b> '+escapeHtml(saved.tips) : ''}</div>
 
-    <div class="disclaimer">※ 영상 정보(제목·채널·조회수)는 유튜브 데이터 API에서 실시간으로 가져와요. 자동 정리 결과는 AI가 영상 설명·자막을 요약한 것이라 틀릴 수 있으니, 저장 전에 한 번 확인하고 고쳐주세요.</div>
+    <div class="disclaimer">※ 영상 정보(제목·채널·조회수)는 유튜브 데이터 API에서 실시간으로 가져와요. 자동 정리 결과는 영상 설명·자막을 자동으로 정리한 것이라 틀릴 수 있으니, 저장 전에 한 번 확인하고 고쳐주세요.</div>
   `;
   resultEl.classList.add('show');
 
@@ -737,13 +834,14 @@ function renderVideo(q, video){
     btn.disabled = true; btn.textContent = '정리하는 중…';
     msg.style.display='none';
     try{
-      const text = `[영상 설명]\n${description}\n\n[자막]\n${transcript || '(없음)'}`;
-      const r = await summarizeRecipe(q, video.snippet.title, text);
+      const r = await summarizeRecipe(q, video.snippet.title, description, transcript);
       const ings = (r.ingredients || []).map(x => Array.isArray(x) ? (x[0] + (x[1] ? ' ' + x[1] : '')) : String(x));
       const steps = (r.steps || []).map(String);
       if(!ings.length && !steps.length){
         msg.style.display='block'; msg.style.color='var(--accent)';
-        msg.textContent = transcript ? '재료와 조리 순서를 찾지 못했어요.' : '영상 설명에 레시피가 없어요. 자막을 붙여넣고 다시 눌러주세요.';
+        msg.textContent = (transcript ? '재료와 조리 순서를 찾지 못했어요.' : '영상 설명에 레시피가 없어요. 자막을 붙여넣고 다시 눌러주세요.')
+          + (r.method === 'AI 없이 자동 추출' && !getGeminiKey() ? ' ⚙ 설정에서 무료 Gemini 키를 넣으면 자막에서도 정리할 수 있어요.' : '')
+          + (r.notes && r.notes.length ? ' (' + r.notes.join(' / ') + ')' : '');
       } else {
         ingEl.value = ings.join('\n');
         stepEl.value = steps.join('\n');
@@ -752,7 +850,8 @@ function renderVideo(q, video){
         tb.style.display = currentTips ? '' : 'none';
         tb.innerHTML = currentTips ? '<b>꿀팁 —</b> ' + escapeHtml(currentTips) : '';
         msg.style.display='block'; msg.style.color='var(--green)';
-        msg.textContent = `재료 ${ings.length}개, 조리 단계 ${steps.length}개를 정리했어요. 확인 후 저장해주세요.`;
+        msg.textContent = `[${r.method}] 재료 ${ings.length}개, 조리 단계 ${steps.length}개를 정리했어요. 확인 후 저장해주세요.`
+          + (r.notes && r.notes.length ? ' (AI 호출 실패로 대신 추출: ' + r.notes.join(' / ') + ')' : '');
       }
     }catch(err){
       msg.style.display='block'; msg.style.color='var(--accent)';
