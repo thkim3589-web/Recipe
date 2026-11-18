@@ -555,7 +555,7 @@ const CATEGORIES = ["국/찌개","밥/죽","면","반찬","고기/구이","분�
       const id = v.videoId || ('r' + Date.now() + i);
       out[id] = { id, dish, videoId: v.videoId || '', title: v.title || dish, channel: v.channelTitle || '', thumb: v.thumb || '',
         views: v.views || 0, description: v.description || '', ing: o.ing || '', steps: o.steps || '', tips: o.tips || '',
-        category: o.category || '기타', favorite: !!o.favorite, servings: 2, savedAt: o.savedAt || Date.now() };
+        category: o.category || '기타', favorite: !!o.favorite, servings: 2, servingsGuess: true, savedAt: o.savedAt || Date.now() };
     });
   }
   LS.set(K_REC, out);
@@ -567,7 +567,7 @@ function recipeFromVideo(dish, v){
   return { id: v.id, dish, videoId: v.id, title: v.snippet.title, channel: v.snippet.channelTitle,
     thumb: v.snippet.thumbnails?.medium?.url || v.snippet.thumbnails?.default?.url || '',
     views: v.statistics?.viewCount || 0, description: (v.snippet.description || '').slice(0, 8000),
-    ing: '', steps: '', tips: '', category: guessCategory(dish), favorite: false, servings: 2, savedAt: 0 };
+    ing: '', steps: '', tips: '', category: guessCategory(dish), favorite: false, servings: 2, servingsGuess: true, savedAt: 0 };
 }
 function guessCategory(d){
   if(/찌개|국|탕|전골|스튜/.test(d)) return '국/찌개';
@@ -593,8 +593,9 @@ const settingsOverlay = $('settingsOverlay');
 function openSettings(){
   $('apiKeyInput').value = getApiKey(); $('geminiKeyInput').value = getGeminiKey(); $('claudeKeyInput').value = getClaudeKey();
   settingsOverlay.style.display = 'flex';
+  navSync();
 }
-function closeSettings(){ settingsOverlay.style.display = 'none'; }
+function closeSettings(){ settingsOverlay.style.display = 'none'; navSync(); }
 $('settingsBtn').onclick = openSettings;
 $('settingsCancel').onclick = closeSettings;
 settingsOverlay.addEventListener('click', e => { if(e.target === settingsOverlay) closeSettings(); });
@@ -964,6 +965,7 @@ function runSearch(q){
 }
 
 function renderTop5(){
+  detailOpen = false;
   const { q, list: full, shown, next } = lastSearch;
   const list = full.slice(0, shown);
   const canMore = full.length > shown || !!next;
@@ -1005,6 +1007,7 @@ function renderTop5(){
     if(lastSearch.list.length <= lastSearch.shown && !lastSearch.next) lastSearch.next = null;
     const y = window.scrollY; renderTop5(); window.scrollTo({ top: y });
   };
+  navSync();
   el.querySelectorAll('.vcard').forEach(c => c.onclick = () => {
     const v = list[+c.dataset.i];
     const saved = getRecipes()[v.id];
@@ -1048,6 +1051,7 @@ function renderDetail(r, opts){
     <div class="section-label">인분 조절</div>
     <div class="serv">
       이 레시피는 <input type="number" id="baseServ" min="1" max="50" value="${r.servings || 2}"> 인분 기준
+      <span id="servGuess" style="flex-basis:100%;font-size:12px;color:var(--accent);${r.servingsGuess ? '' : 'display:none;'}">영상에 몇 인분인지 안 나와서 2인분으로 가정했어요. 다르면 숫자를 고쳐주세요.</span>
       <span style="flex-basis:100%;height:0;"></span>
       만들 양 <span class="stepper"><button id="servMinus">−</button><b id="servTarget">${target}인분</b><button id="servPlus">＋</button></span>
     </div>
@@ -1107,14 +1111,17 @@ function renderDetail(r, opts){
   }
   const factor = () => target / Math.max(1, parseInt($('baseServ').value, 10) || 2);
 
-  if($('backBtn')) $('backBtn').onclick = () => {
+  detailOpen = true;
+  detailBackFn = () => {
     if(opts.from === 'top5' && lastSearch){ renderTop5(); window.scrollTo({ top: 0 }); }
-    else switchView(opts.from);
+    else { switchView(opts.from || 'search'); window.scrollTo({ top: 0 }); }
   };
+  if($('backBtn')) $('backBtn').onclick = () => detailBackFn();
+  navSync();
   $('favBtn').onclick = () => { r.favorite = !r.favorite; $('favBtn').style.color = r.favorite ? 'var(--accent)' : 'var(--line)'; save(true); toast(r.favorite ? '즐겨찾기에 넣었어요' : '즐겨찾기에서 뺐어요'); };
   $('servMinus').onclick = () => { if(target > 1){ target--; renderScaled(); } };
   $('servPlus').onclick = () => { if(target < 50){ target++; renderScaled(); } };
-  $('baseServ').oninput = renderScaled;
+  $('baseServ').oninput = () => { r.servingsGuess = false; $('servGuess').style.display = 'none'; renderScaled(); };
   ingEl.oninput = renderScaled;
   function needData(what){
     const msg = $('autoMsg');
@@ -1156,7 +1163,7 @@ function renderDetail(r, opts){
       } else {
         ingEl.value = ings.join('\n'); stepEl.value = steps.join('\n');
         r.tips = res.tips || '';
-        if(res.servings && +res.servings > 0){ $('baseServ').value = Math.round(+res.servings); target = Math.round(+res.servings); }
+        if(res.servings && +res.servings > 0){ $('baseServ').value = Math.round(+res.servings); target = Math.round(+res.servings); r.servingsGuess = false; $('servGuess').style.display = 'none'; }
         const tb = $('tipsBox'); tb.style.display = r.tips ? '' : 'none'; tb.innerHTML = r.tips ? '<b>꿀팁 —</b> ' + escapeHtml(r.tips) : '';
         renderScaled();
         save(true);
@@ -1177,12 +1184,50 @@ function renderDetail(r, opts){
 let selectMode = false;
 const selected = new Set();
 let pantryQuery = '';
+const isEmptyRecipe = r => !lines(r.ing).length && !lines(r.steps).length;
+function ingMatches(line, term){
+  const name = splitNameQty(line).name.replace(/\s|\(.*?\)/g, '');
+  if(!name) return false;
+  if(term.length === 1) return name === term;          // "파"는 "파"만 (양파·대파 제외)
+  return name.includes(term) || (name.length >= 2 && term.includes(name));
+}
 function renderSaved(){
+  const map = getRecipes();
+  const total = Object.keys(map).length;
+  const empties = Object.values(map).filter(isEmptyRecipe).length;
+  $('view-saved').innerHTML = `
+    <div class="list-head"><h2>${selectMode ? '장보기에 담을 레시피 선택' : '저장한 레시피'}</h2><span>${total}개</span></div>
+    ${selectMode ? `<button class="back-btn" id="selCancel">← 선택 취소</button>` : `
+    <div class="row" style="margin:6px 0;">
+      <input id="pantryInput" class="field grow" placeholder="🧊 냉장고 재료로 찾기 (예: 김치, 두부, 돼지고기)" value="${escapeHtml(pantryQuery)}" autocomplete="off">
+    </div>
+    <div class="row" style="justify-content:space-between;">
+      <label style="display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--ink-muted);"><input type="checkbox" id="favOnlyToggle" ${renderSaved.favOnly ? 'checked' : ''}> 즐겨찾기만</label>
+      <button class="btn ghost" id="selStart" style="font-size:12.5px;padding:6px 10px;">🛒 여러 개 골라 장보기</button>
+    </div>
+    ${empties ? `<button class="btn ghost" id="cleanEmpty" style="font-size:12.5px;padding:6px 10px;margin-top:4px;color:var(--accent);">🧹 비어 있는 레시피 ${empties}개 정리</button>` : ''}`}
+    <div id="savedBody"></div>`;
+  if(selectMode){
+    $('selCancel').onclick = () => { selectMode = false; selected.clear(); renderSaved(); };
+  } else {
+    const pi = $('pantryInput');
+    pi.oninput = () => { pantryQuery = pi.value; clearTimeout(renderSaved._t); renderSaved._t = setTimeout(renderSavedBody, 300); };
+    $('favOnlyToggle').onchange = e => { renderSaved.favOnly = e.target.checked; renderSavedBody(); };
+    $('selStart').onclick = () => { selectMode = true; selected.clear(); renderSaved(); };
+    if($('cleanEmpty')) $('cleanEmpty').onclick = () => {
+      if(!confirm(`재료와 조리 순서가 모두 비어 있는 레시피 ${empties}개를 지울까요?`)) return;
+      const m = getRecipes(); Object.keys(m).forEach(id => { if(isEmptyRecipe(m[id])) delete m[id]; }); setRecipes(m);
+      toast(`${empties}개를 정리했어요`); renderSaved();
+    };
+  }
+  renderSavedBody();
+  navSync();
+}
+function renderSavedBody(){
   const map = getRecipes();
   const favOnly = renderSaved.favOnly || false;
   let items = Object.values(map).filter(r => !favOnly || r.favorite);
-  const total = Object.keys(map).length;
-  const terms = pantryQuery.split(/[,，\s]+/).map(s => s.trim()).filter(Boolean);
+  const terms = selectMode ? [] : pantryQuery.split(/[,，\s]+/).map(s => s.trim()).filter(Boolean);
   let bodyHtml = '';
   const card = (r, extra) => `
     <div class="vcard" data-id="${escapeHtml(r.id)}">
@@ -1190,7 +1235,7 @@ function renderSaved(){
       <div class="vthumb" style="width:76px;height:56px;background-image:url('${escapeHtml(r.thumb)}')"></div>
       <div class="vbody">
         <div class="vtitle">${escapeHtml(r.dish)} <span style="font-weight:400;color:var(--ink-muted);font-size:12px;">· ${escapeHtml(r.channel)}</span></div>
-        <div class="vsub">재료 ${lines(r.ing).length}개 · 단계 ${lines(r.steps).length}개 · ${r.servings || 2}인분</div>
+        <div class="vsub">${isEmptyRecipe(r) ? '<span class="tag red" style="margin-left:0;">비어 있음</span> 열면 자동 정리해요' : `재료 ${lines(r.ing).length}개 · 단계 ${lines(r.steps).length}개 · ${r.servings || 2}인분${r.servingsGuess ? '(추정)' : ''}`}</div>
         ${extra || ''}
       </div>
       ${selectMode ? '' : `<button class="star" style="background:none;border:none;font-size:20px;cursor:pointer;color:${r.favorite ? 'var(--accent)' : 'var(--line)'};">★</button>`}
@@ -1198,9 +1243,9 @@ function renderSaved(){
   if(!items.length){
     bodyHtml = `<div class="empty show" style="padding:40px 6px 10px;"><span class="glyph">札</span><p>${favOnly ? '즐겨찾기한 레시피가 아직 없어요.' : '아직 저장한 레시피가 없어요.<br>검색해서 TOP 5 중 하나를 골라보세요.'}</p></div>`;
   } else if(terms.length){
-    const scored = items.map(r => {
+    const scored = items.filter(r => !isEmptyRecipe(r)).map(r => {
       const ls = lines(r.ing);
-      const have = ls.filter(l => terms.some(t => l.replace(/\s/g,'').includes(t)));
+      const have = ls.filter(l => terms.some(t => ingMatches(l, t)));
       return { r, have: have.length, total: ls.length, missing: ls.filter(l => !have.includes(l)).map(l => splitNameQty(l).name) };
     }).filter(x => x.have > 0).sort((a, b) => (b.have / b.total) - (a.have / a.total) || b.have - a.have);
     bodyHtml = scored.length ? `<div class="section-label" style="margin-top:14px;">만들 수 있는 순 <span class="count">${scored.length}개</span></div>` + scored.map(x => card(x.r,
@@ -1211,36 +1256,16 @@ function renderSaved(){
     items.sort((a, b) => (b.favorite - a.favorite) || (b.savedAt - a.savedAt)).forEach(r => (byCat[r.category || '기타'] = byCat[r.category || '기타'] || []).push(r));
     bodyHtml = CATEGORIES.filter(c => byCat[c]).map(c => `<div class="section-label" style="margin-top:20px;">${c} <span class="count">${byCat[c].length}개</span></div>` + byCat[c].map(r => card(r)).join('')).join('');
   }
-  $('view-saved').innerHTML = `
-    <div class="list-head"><h2>${selectMode ? '장보기에 담을 레시피 선택' : '저장한 레시피'}</h2><span>${total}개</span></div>
-    ${selectMode ? `<button class="back-btn" id="selCancel">← 선택 취소</button>` : `
-    <div class="row" style="margin:6px 0;">
-      <input id="pantryInput" class="field grow" placeholder="🧊 냉장고 재료로 찾기 (예: 김치, 두부, 돼지고기)" value="${escapeHtml(pantryQuery)}" autocomplete="off">
-    </div>
-    <div class="row" style="justify-content:space-between;">
-      <label style="display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--ink-muted);"><input type="checkbox" id="favOnlyToggle" ${favOnly ? 'checked' : ''}> 즐겨찾기만</label>
-      <button class="btn ghost" id="selStart" style="font-size:12.5px;padding:6px 10px;">🛒 여러 개 골라 장보기</button>
-    </div>`}
-    ${bodyHtml}
-    ${selectMode ? `<div class="selbar"><span>${selected.size}개 선택</span><button id="selDone" ${selected.size ? '' : 'disabled'}>장보기에 담기</button></div>` : ''}`;
-
-  if(selectMode){
-    $('selCancel').onclick = () => { selectMode = false; selected.clear(); renderSaved(); };
-    $('selDone').onclick = () => {
-      const m = getRecipes(); let n = 0; selected.forEach(id => { if(m[id]) n += addToShopping(m[id], 1); });
-      toast(`레시피 ${selected.size}개의 재료 ${n}개를 담았어요`); selectMode = false; selected.clear(); switchView('shop');
-    };
-  } else {
-    const pi = $('pantryInput');
-    pi.oninput = () => { pantryQuery = pi.value; clearTimeout(renderSaved._t); renderSaved._t = setTimeout(() => { renderSaved(); const p = $('pantryInput'); p.focus(); p.setSelectionRange(p.value.length, p.value.length); }, 350); };
-    $('favOnlyToggle').onchange = e => { renderSaved.favOnly = e.target.checked; renderSaved(); };
-    $('selStart').onclick = () => { selectMode = true; selected.clear(); renderSaved(); };
-  }
-  document.querySelectorAll('#view-saved .vcard').forEach(c => {
+  $('savedBody').innerHTML = bodyHtml + (selectMode ? `<div class="selbar"><span>${selected.size}개 선택</span><button id="selDone" ${selected.size ? '' : 'disabled'}>장보기에 담기</button></div>` : '');
+  if(selectMode) $('selDone').onclick = () => {
+    const m = getRecipes(); let n = 0; selected.forEach(id => { if(m[id]) n += addToShopping(m[id], 1); });
+    toast(`레시피 ${selected.size}개의 재료 ${n}개를 담았어요`); selectMode = false; selected.clear(); switchView('shop');
+  };
+  document.querySelectorAll('#savedBody .vcard').forEach(c => {
     const id = c.dataset.id;
     c.onclick = e => {
-      if(selectMode){ if(selected.has(id)) selected.delete(id); else selected.add(id); renderSaved(); return; }
-      if(e.target.classList.contains('star')){ const m = getRecipes(); m[id].favorite = !m[id].favorite; setRecipes(m); renderSaved(); return; }
+      if(selectMode){ if(selected.has(id)) selected.delete(id); else selected.add(id); renderSavedBody(); return; }
+      if(e.target.classList.contains('star')){ const m = getRecipes(); m[id].favorite = !m[id].favorite; setRecipes(m); renderSavedBody(); return; }
       const r = getRecipes()[id]; if(r){ addRecent(r); renderDetail(r, { from: 'saved' }); window.scrollTo({ top: 0 }); }
     };
   });
@@ -1264,7 +1289,7 @@ function renderRecent(){
   document.querySelectorAll('#view-recent .vcard').forEach(c => c.onclick = () => {
     const x = list[+c.dataset.i];
     const r = getRecipes()[x.id] || { id: x.id, dish: x.dish, videoId: x.videoId, title: x.title, channel: x.channel, thumb: x.thumb, views: x.views,
-      description: x.description || '', ing: '', steps: '', tips: '', category: guessCategory(x.dish), favorite: false, servings: 2, savedAt: 0 };
+      description: x.description || '', ing: '', steps: '', tips: '', category: guessCategory(x.dish), favorite: false, servings: 2, servingsGuess: true, savedAt: 0 };
     addRecent(r); renderDetail(r, { from: 'recent' }); window.scrollTo({ top: 0 });
   });
 }
@@ -1289,6 +1314,7 @@ function openCook(r, factor){
   document.body.style.overflow = 'hidden';
   keepAwake(true);
   showCookStep();
+  navSync();
 }
 function showCookStep(){
   const { i, steps } = cook;
@@ -1333,11 +1359,17 @@ $('cookClose').onclick = closeCook;
 function closeCook(){
   $('cook').classList.remove('show'); document.body.style.overflow = '';
   keepAwake(false); clearInterval(timerIv); $('timerBar').classList.remove('show', 'ring');
+  navSync();
 }
 
 // ---- 화면 전환 ----
 function switchView(name, keepResult){
   currentView = name;
+  const wasDetail = detailOpen;
+  if(!keepResult && wasDetail){
+    detailOpen = false;
+    if(lastSearch) renderTop5(); else showEmptyDefault();
+  }
   document.querySelectorAll('footer.tab .t').forEach(t => t.classList.toggle('on', t.dataset.view === name));
   ['search','saved','shop','recent'].forEach(v => $('view-' + v).style.display = v === name ? '' : 'none');
   $('searchArea').style.display = name === 'search' ? '' : 'none';
@@ -1345,10 +1377,34 @@ function switchView(name, keepResult){
   if(name === 'saved') renderSaved();
   if(name === 'shop') renderShop();
   if(name === 'recent') renderRecent();
-  if(name !== 'saved' && selectMode && name !== 'search'){ /* 유지 */ }
+  navSync();
 }
+
+// ---- 폰 뒤로가기 버튼 처리 (앱이 바로 꺼지지 않게) ----
+var detailOpen = false, detailBackFn = null, navHasEntry = false, navIgnore = false;
+function isHome(){
+  return !$('cook').classList.contains('show') && settingsOverlay.style.display !== 'flex'
+    && currentView === 'search' && !detailOpen && !selectMode;
+}
+function navSync(){
+  if(isHome()){ if(navHasEntry){ navHasEntry = false; navIgnore = true; history.back(); } }
+  else if(!navHasEntry){ history.pushState({ app: 1 }, ''); navHasEntry = true; }
+}
+function goBackOne(){
+  if($('cook').classList.contains('show')) closeCook();
+  else if(settingsOverlay.style.display === 'flex') closeSettings();
+  else if(selectMode){ selectMode = false; selected.clear(); renderSaved(); }
+  else if(detailOpen && detailBackFn) detailBackFn();
+  else if(currentView !== 'search') switchView('search');
+}
+window.addEventListener('popstate', () => {
+  if(navIgnore){ navIgnore = false; return; }
+  navHasEntry = false;
+  goBackOne();
+  navSync();
+});
 document.querySelectorAll('footer.tab .t').forEach(t => t.addEventListener('click', () => {
-  if(t.dataset.view === 'search' && currentView === 'search' && lastSearch && $('result').classList.contains('show') && !$('result').querySelector('.list-head')){ renderTop5(); return; }
+  if(t.dataset.view === 'search' && currentView === 'search' && detailOpen){ if(lastSearch) renderTop5(); else { detailOpen = false; showEmptyDefault(); navSync(); } window.scrollTo({ top: 0 }); return; }
   if(t.dataset.view !== 'saved') selectMode = false;
   switchView(t.dataset.view); window.scrollTo({ top: 0 });
 }));
