@@ -762,7 +762,7 @@ function parseJsonOut(out){
 }
 
 const GEMINI_MODELS = ['gemini-flash-latest', 'gemini-2.5-flash', 'gemini-flash-lite-latest', 'gemini-2.5-flash-lite'];
-async function summarizeWithGemini(prompt){
+async function summarizeWithGemini(prompt, videoUrl){
   const key = getGeminiKey();
   let lastErr = null;
   for(const model of GEMINI_MODELS){
@@ -771,7 +771,7 @@ async function summarizeWithGemini(prompt){
         method: 'POST',
         headers: { 'content-type': 'application/json', 'x-goog-api-key': key },
         body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
+          contents: [{ parts: videoUrl ? [{ file_data: { file_uri: videoUrl } }, { text: prompt }] : [{ text: prompt }] }],
           generationConfig: { responseMimeType: 'application/json', temperature: 0.2 }
         })
       });
@@ -855,12 +855,20 @@ function extractRuleBased(description, transcript){
   return { ingredients: ings.map(x => [x, '']), steps, tips: '', servings: sv ? +sv[1] : 0 };
 }
 
-async function summarizeRecipe(dish, title, description, transcript){
+async function summarizeRecipe(dish, title, description, transcript, videoId){
   const text = `[영상 설명]\n${description}\n\n[자막]\n${transcript || '(없음)'}`;
   const prompt = buildPrompt(dish, title, text);
   const notes = [];
+  // 설명란에 레시피가 없고 자막도 없으면 → Gemini가 영상을 직접 보고 정리
+  const weak = extractRuleBased(description, transcript).ingredients.length < 3 && !transcript;
   if(getGeminiKey()){
-    try{ return { ...(await summarizeWithGemini(prompt)), method: 'Gemini(무료)' }; }
+    try{
+      if(weak && videoId){
+        const vPrompt = `이 유튜브 요리 영상("${title}", 요리: ${dish})을 보고 듣고, 실제로 나오는 재료와 조리 순서를 정리하세요. 영상 설명란도 참고하세요:\n${description.slice(0, 3000)}\n\n` + '이 영상에서' + prompt.split('이 텍스트에서')[1].split('<text>')[0].replace('텍스트에 실제로 나온', '영상에 실제로 나온');
+        return { ...(await summarizeWithGemini(vPrompt, 'https://www.youtube.com/watch?v=' + videoId)), method: 'Gemini 영상 분석(무료)' };
+      }
+      return { ...(await summarizeWithGemini(prompt)), method: 'Gemini(무료)' };
+    }
     catch(e){
       const m = e.message || '';
       if(/prepayment credits|prepay/i.test(m)) notes.push('Gemini: 이 키의 구글 프로젝트가 유료(결제) 계정에 연결돼 있어 무료로 못 써요. 결제 연결 안 된 새 프로젝트에서 키를 다시 만들어주세요');
@@ -945,7 +953,7 @@ function renderTop5(){
         <div class="vbody">
           <div class="vtitle">${escapeHtml(v.snippet.title)}</div>
           <div class="vsub">${escapeHtml(v.snippet.channelTitle)} · 조회수 ${fmtViews(v.statistics.viewCount)}회${rec[v.id] ? '<span class="tag">저장됨</span>' : ''}</div>
-          <div class="vprev ${ok ? 'ok' : 'no'}">${ok ? `✓ 설명란 레시피 · 재료 ${p.ingredients.length}개${p.steps.length ? ' · 단계 ' + p.steps.length + '개' : ''}` : '설명란에 레시피 없음 · AI/자막으로 정리'}</div>
+          <div class="vprev ${ok ? 'ok' : 'no'}">${ok ? `✓ 설명란 레시피 · 재료 ${p.ingredients.length}개${p.steps.length ? ' · 단계 ' + p.steps.length + '개' : ''}` : (getGeminiKey() ? '설명란에 레시피 없음 · 🎬 Gemini가 영상 보고 정리' : '설명란에 레시피 없음 · Gemini 키 있으면 영상 보고 정리')}</div>
         </div>
       </div>`; }).join('')}`;
   el.classList.add('show');
@@ -1080,21 +1088,22 @@ function renderDetail(r, opts){
     const btn = $('autoBtn'), msg = $('autoMsg');
     const transcript = $('transcriptInput').value.trim();
     const say = (t, ok) => { msg.style.display = 'block'; msg.style.color = ok ? 'var(--green)' : 'var(--accent)'; msg.textContent = t; };
-    if(!r.description.trim() && !transcript){
-      say('영상 설명이 비어 있어요. 자막을 붙여넣고 자동 정리를 눌러주세요.', false);
+    if(!r.description.trim() && !transcript && !getGeminiKey()){
+      say('영상 설명이 비어 있어요. ⚙ 설정에 무료 Gemini 키를 넣으면 영상을 직접 보고 정리해요.', false);
       if(auto){ save(true); }
       return;
     }
     if(!auto && (ingEl.value.trim() || stepEl.value.trim()) && !confirm('입력해 둔 재료·조리순서를 자동 정리 결과로 바꿀까요?')) return;
     btn.disabled = true; btn.textContent = '정리하는 중…'; msg.style.display = 'none';
     try{
-      const res = await summarizeRecipe(r.dish, r.title, r.description, transcript);
+      if(getGeminiKey() && r.videoId && !transcript && extractRuleBased(r.description, '').ingredients.length < 3){ btn.textContent = '🎬 영상 보고 정리하는 중… (30초~1분)'; }
+      const res = await summarizeRecipe(r.dish, r.title, r.description, transcript, r.videoId);
       const ings = (res.ingredients || []).map(x => Array.isArray(x) ? (x[0] + (x[1] ? ' ' + x[1] : '')) : String(x));
       const steps = (res.steps || []).map(String);
       const notes = res.notes && res.notes.length ? ' (' + res.notes.join(' / ') + ')' : '';
       if(!ings.length && !steps.length){
         say((transcript ? '재료와 조리 순서를 찾지 못했어요.' : '영상 설명에 레시피가 없어요. 자막을 붙여넣고 다시 눌러주세요.')
-          + (!getGeminiKey() ? ' ⚙ 설정에서 무료 Gemini 키를 넣으면 자막에서도 정리할 수 있어요.' : '') + notes, false);
+          + (!getGeminiKey() ? ' ⚙ 설정에 무료 Gemini 키를 넣으면 설명란이 없어도 Gemini가 영상을 직접 보고 정리해요.' : '') + notes, false);
         if(auto){ save(true); say($('autoMsg').textContent + ' 영상은 저장해 뒀어요.', false); }
       } else {
         ingEl.value = ings.join('\n'); stepEl.value = steps.join('\n');
