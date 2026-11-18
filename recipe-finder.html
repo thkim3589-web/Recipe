@@ -902,7 +902,16 @@ async function ytSearch(q){
   const all = vData.items || [];
   const norm = t => String(t || '').replace(/\s|[\'"‘’“”]/g, '').toLowerCase();
   const nq = norm(q);
-  const onTopic = v => norm(v.snippet.title).includes(nq) || (v.snippet.tags || []).some(t => norm(t) === nq);
+  // 제목이 검색어와 얼마나 비슷한지 (두 글자씩 쪼개서 겹치는 비율) — 오타나 띄어쓰기 차이도 어느 정도 허용
+  const grams = t => { const g = []; for(let i = 0; i < t.length - 1; i++) g.push(t.slice(i, i + 2)); return g.length ? g : [t]; };
+  const qg = grams(nq);
+  const sim = v => {
+    const t = norm(v.snippet.title), tags = (v.snippet.tags || []).map(norm);
+    if(t.includes(nq) || tags.includes(nq)) return 1;
+    return qg.filter(g => t.includes(g)).length / qg.length;
+  };
+  all.forEach(v => v._sim = sim(v));
+  const onTopic = v => v._sim >= 0.5;
   const views = v => +v.statistics.viewCount || 0;
   all.forEach(v => {
     v._sec = isoSec(v.contentDetails && v.contentDetails.duration);
@@ -915,7 +924,10 @@ async function ytSearch(q){
   // 일반 영상 우선, 부족하면 쇼츠로 채움
   const longs = list.filter(v => !v._short), shorts = list.filter(v => v._short);
   const rank = arr => arr.sort((a, b) => (b._hasRecipe - a._hasRecipe) || (views(b) - views(a)));
-  return rank(longs).concat(rank(shorts)).slice(0, 5);
+  const out = rank(longs).concat(rank(shorts));
+  // 정확히 맞는 영상이 먼저, 비슷한 영상은 뒤에
+  out.sort((a, b) => (b._sim === 1) - (a._sim === 1));
+  return out.slice(0, 5);
 }
 
 let lastSearch = null; // { q, list }
@@ -959,6 +971,7 @@ function renderTop5(){
   el.innerHTML = `
     <div class="list-head"><h2>‘${escapeHtml(q)}’ TOP ${list.length}</h2><span>레시피 있는 영상 우선 · 조회수 순</span></div>
     <p style="font-size:12.5px;color:var(--ink-muted);margin:0 0 4px;">원하는 영상을 고르면 재료와 조리 순서를 정리해서 바로 저장해요.</p>
+    ${list.length < 5 ? `<p style="font-size:12.5px;color:var(--accent);margin:0 0 4px;">‘${escapeHtml(q)}’ 제목의 레시피 영상이 ${list.length}개뿐이에요. 맞춤법이나 띄어쓰기를 확인하거나 더 일반적인 이름으로 검색해보세요.</p>` : ''}
     ${list.map((v, i) => {
       const p = v._prev, ok = p.ingredients.length >= 3;
       return `<div class="vcard" data-i="${i}">
