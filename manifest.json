@@ -1,0 +1,24 @@
+{
+ "name": "레시피 찾기",
+ "short_name": "레시피",
+ "start_url": "./recipe-finder.html",
+ "scope": "./",
+ "display": "standalone",
+ "background_color": "#F2E8D5",
+ "theme_color": "#B23A2E",
+ "lang": "ko",
+ "icons": [
+  {
+   "src": "icons/icon-192.png",
+   "sizes": "192x192",
+   "type": "image/png",
+   "purpose": "any maskable"
+  },
+  {
+   "src": "icons/icon-512.png",
+   "sizes": "512x512",
+   "type": "image/png",
+   "purpose": "any maskable"
+  }
+ ]
+}

@@ -8,9 +8,9 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="레시피찾기">
-<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%23B23A2E'/%3E%3Ctext x='50' y='68' font-size='56' text-anchor='middle' fill='%23F2E8D5' font-family='Georgia,serif'%3E鍋%3C/text%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%23B23A2E'/%3E%3Ctext x='50' y='68' font-size='56' text-anchor='middle' fill='%23F2E8D5' font-family='Georgia,serif'%3E鍋%3C/text%3E%3C/svg%3E">
-<link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22%EB%A0%88%EC%8B%9C%ED%94%BC%20%EC%B0%BE%EA%B8%B0%22%2C%22short_name%22%3A%22%EB%A0%88%EC%8B%9C%ED%94%BC%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23F2E8D5%22%2C%22theme_color%22%3A%22%23B23A2E%22%7D">
+<link rel="manifest" href="manifest.json">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Song+Myung&family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -441,6 +441,9 @@
       </form>
     </div>
     <div class="chips" id="chips"></div>
+    <label style="display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--ink-muted);padding:2px 22px 0;">
+      <input type="checkbox" id="hideShorts"> 쇼츠(짧은 영상) 빼고 보기
+    </label>
   </div>
 
   <main>
@@ -980,7 +983,10 @@ function runSearch(q){
 
 function renderTop5(){
   detailOpen = false;
-  const { q, list: full, shown, next } = lastSearch;
+  const hide = $('hideShorts').checked;
+  const { q, next } = lastSearch;
+  const full = hide ? lastSearch.list.filter(v => !v._short) : lastSearch.list;
+  const shown = Math.min(lastSearch.shown, full.length) || Math.min(5, full.length);
   const list = full.slice(0, shown);
   const canMore = full.length > shown || !!next;
   const rec = getRecipes();
@@ -1005,11 +1011,12 @@ function renderTop5(){
   el.classList.add('show');
   if($('moreBtn')) $('moreBtn').onclick = async () => {
     const btn = $('moreBtn');
-    if(lastSearch.list.length < lastSearch.shown + 5 && lastSearch.next){
+    const vis = () => ($('hideShorts').checked ? lastSearch.list.filter(v => !v._short) : lastSearch.list).length;
+    if(vis() < lastSearch.shown + 5 && lastSearch.next){
       btn.disabled = true; btn.textContent = '더 찾는 중…';
       try{
         let tries = 0;
-        while(lastSearch.list.length < lastSearch.shown + 5 && lastSearch.next && tries < 2){
+        while(vis() < lastSearch.shown + 5 && lastSearch.next && tries < 2){
           const r = await ytSearch(lastSearch.q, lastSearch.next);
           const have = new Set(lastSearch.list.map(v => v.id));
           lastSearch.list = lastSearch.list.concat(r.list.filter(v => !have.has(v.id)));
@@ -1017,8 +1024,7 @@ function renderTop5(){
         }
       }catch(err){ toast('더 불러오지 못했어요: ' + err.message); }
     }
-    lastSearch.shown = Math.min(lastSearch.shown + 5, lastSearch.list.length);
-    if(lastSearch.list.length <= lastSearch.shown && !lastSearch.next) lastSearch.next = null;
+    lastSearch.shown = Math.min(lastSearch.shown + 5, vis());
     const y = window.scrollY; renderTop5(); window.scrollTo({ top: y });
   };
   navSync();
@@ -1225,7 +1231,7 @@ function renderSaved(){
     <div class="list-head"><h2>${selectMode ? '장보기에 담을 레시피 선택' : '저장한 레시피'}</h2><span>${total}개</span></div>
     ${selectMode ? `<button class="back-btn" id="selCancel">← 선택 취소</button>` : `
     <div class="row" style="margin:6px 0;">
-      <input id="pantryInput" class="field grow" placeholder="🧊 냉장고 재료로 찾기 (예: 김치, 두부, 돼지고기)" value="${escapeHtml(pantryQuery)}" autocomplete="off">
+      <input id="pantryInput" class="field grow" placeholder="🔍 요리 이름 또는 냉장고 재료 (예: 김치, 두부)" value="${escapeHtml(pantryQuery)}" autocomplete="off">
     </div>
     <div class="row" style="justify-content:space-between;">
       <label style="display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--ink-muted);"><input type="checkbox" id="favOnlyToggle" ${renderSaved.favOnly ? 'checked' : ''}> 즐겨찾기만</label>
@@ -1269,14 +1275,17 @@ function renderSavedBody(){
   if(!items.length){
     bodyHtml = `<div class="empty show" style="padding:40px 6px 10px;"><span class="glyph">札</span><p>${favOnly ? '즐겨찾기한 레시피가 아직 없어요.' : '아직 저장한 레시피가 없어요.<br>검색해서 TOP 5 중 하나를 골라보세요.'}</p></div>`;
   } else if(terms.length){
-    const scored = items.filter(r => !isEmptyRecipe(r)).map(r => {
+    const nn = t => String(t || '').replace(/\s/g, '').toLowerCase();
+    const byName = items.filter(r => terms.some(t => nn(r.dish).includes(nn(t)) || nn(r.title).includes(nn(t))));
+    const nameHtml = byName.length ? `<div class="section-label" style="margin-top:14px;">이름이 맞는 레시피 <span class="count">${byName.length}개</span></div>` + byName.map(r => card(r)).join('') : '';
+    const scored = items.filter(r => !isEmptyRecipe(r) && !byName.includes(r)).map(r => {
       const ls = lines(r.ing);
       const have = ls.filter(l => terms.some(t => ingMatches(l, t)));
       return { r, have: have.length, total: ls.length, missing: ls.filter(l => !have.includes(l)).map(l => splitNameQty(l).name) };
     }).filter(x => x.have > 0).sort((a, b) => (b.have / b.total) - (a.have / a.total) || b.have - a.have);
-    bodyHtml = scored.length ? `<div class="section-label" style="margin-top:14px;">만들 수 있는 순 <span class="count">${scored.length}개</span></div>` + scored.map(x => card(x.r,
+    bodyHtml = nameHtml + (scored.length ? `<div class="section-label" style="margin-top:14px;">재료로 만들 수 있는 순 <span class="count">${scored.length}개</span></div>` + scored.map(x => card(x.r,
       `<div class="vprev ok">재료 ${x.total}개 중 ${x.have}개 있음</div>${x.missing.length ? `<div class="vsub">부족: ${escapeHtml(x.missing.slice(0, 6).join(', '))}${x.missing.length > 6 ? ' 외 ' + (x.missing.length - 6) + '개' : ''}</div>` : '<div class="vprev ok">재료 다 있어요!</div>'}`)).join('')
-      : `<div class="empty show" style="padding:30px 6px;"><p>‘${escapeHtml(terms.join(', '))}’가 들어간 저장 레시피가 없어요.</p></div>`;
+      : (nameHtml ? '' : `<div class="empty show" style="padding:30px 6px;"><p>‘${escapeHtml(terms.join(', '))}’가 들어간 저장 레시피가 없어요.</p></div>`));
   } else {
     const byCat = {};
     items.sort((a, b) => (b.favorite - a.favorite) || (b.savedAt - a.savedAt)).forEach(r => (byCat[r.category || '기타'] = byCat[r.category || '기타'] || []).push(r));
@@ -1452,6 +1461,10 @@ $('searchForm').addEventListener('submit', e => { e.preventDefault(); runSearch(
 
 renderChips();
 showEmptyDefault();
+$('hideShorts').checked = LS.get('hide_shorts', false);
+$('hideShorts').onchange = e => { LS.set('hide_shorts', e.target.checked); if(lastSearch && !detailOpen && currentView === 'search'){ lastSearch.shown = 5; renderTop5(); } };
+// 오프라인 지원 (https에서만)
+if('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
 </script>
 </body>
 </html>
