@@ -666,7 +666,13 @@ async function summarizeRecipe(dish, title, description, transcript){
   const notes = [];
   if(getGeminiKey()){
     try{ return { ...(await summarizeWithGemini(prompt)), method: 'Gemini(무료)' }; }
-    catch(e){ notes.push('Gemini: ' + e.message); }
+    catch(e){
+      const m = e.message || '';
+      if(/prepayment credits|prepay/i.test(m)) notes.push('Gemini: 이 키의 구글 프로젝트가 유료(결제) 계정에 연결돼 있어 무료로 못 써요. 결제 연결 안 된 새 프로젝트에서 키를 다시 만들어주세요');
+      else if(/API key not valid|API_KEY_INVALID/i.test(m)) notes.push('Gemini: 키가 올바르지 않아요');
+      else if(/quota|rate|exhausted/i.test(m)) notes.push('Gemini: 오늘 무료 사용 한도를 다 썼어요');
+      else notes.push('Gemini: ' + m);
+    }
   }
   if(getClaudeKey()){
     try{ return { ...(await summarizeWithClaude(prompt)), method: 'Claude' }; }
