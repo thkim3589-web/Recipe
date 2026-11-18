@@ -886,27 +886,41 @@ async function summarizeRecipe(dish, title, description, transcript, videoId){
 
 // ---- 유튜브 검색: 조회수 TOP 5 (먹방 등 제외) ----
 const NOT_RECIPE = /먹방|mukbang|asmr|eating\s?show|리액션|reaction|브이로그|vlog|챌린지|challenge|#shorts/i;
+function isoSec(d){ const m = String(d || '').match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/); return m ? (+m[1] || 0) * 3600 + (+m[2] || 0) * 60 + (+m[3] || 0) : 0; }
 async function ytSearch(q){
   const key = getApiKey();
   if(!key){ const err = new Error('유튜브 API 키가 없어요. 오른쪽 위 ⚙ 버튼을 눌러 먼저 입력해주세요.'); err.noKey = true; throw err; }
-  const sRes = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(q + ' 레시피 만들기')}&order=viewCount&type=video&maxResults=15&relevanceLanguage=ko&key=${key}`);
+  // 관련도 순으로 50개를 받아서 → 제목에 요리 이름이 들어간 것만 → 쇼츠·먹방 제외 → 레시피 있는 영상 우선, 조회수 순
+  const sRes = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(q + ' 레시피')}&order=relevance&type=video&maxResults=50&relevanceLanguage=ko&regionCode=KR&key=${key}`);
   const sData = await sRes.json();
   if(sData.error) throw new Error(sData.error.message || 'API 오류');
   if(!sData.items || !sData.items.length) return [];
   const ids = sData.items.map(i => i.id.videoId).join(',');
-  const vRes = await fetch(`https://www.googleapis.com/youtube/v3/videos?part=statistics,snippet&id=${ids}&key=${key}`);
+  const vRes = await fetch(`https://www.googleapis.com/youtube/v3/videos?part=statistics,snippet,contentDetails&id=${ids}&key=${key}`);
   const vData = await vRes.json();
   if(vData.error) throw new Error(vData.error.message || 'API 오류');
   const all = vData.items || [];
-  let list = all.filter(v => !NOT_RECIPE.test(v.snippet.title + ' ' + (v.snippet.tags || []).join(' ')));
-  if(!list.length) list = all;
-  list.sort((a, b) => (+b.statistics.viewCount || 0) - (+a.statistics.viewCount || 0));
-  return list.slice(0, 5).map(v => { v._prev = extractRuleBased(v.snippet.description || '', ''); return v; });
+  const norm = t => String(t || '').replace(/\s|[\'"‘’“”]/g, '').toLowerCase();
+  const nq = norm(q);
+  const onTopic = v => norm(v.snippet.title).includes(nq) || (v.snippet.tags || []).some(t => norm(t) === nq);
+  const views = v => +v.statistics.viewCount || 0;
+  all.forEach(v => {
+    v._sec = isoSec(v.contentDetails && v.contentDetails.duration);
+    v._short = v._sec > 0 && v._sec <= 180 || /#shorts|쇼츠/i.test(v.snippet.title + ' ' + (v.snippet.description || '').slice(0, 300));
+    v._prev = extractRuleBased(v.snippet.description || '', '');
+    v._hasRecipe = v._prev.ingredients.length >= 3;
+  });
+  let list = all.filter(v => onTopic(v) && !NOT_RECIPE.test(v.snippet.title + ' ' + (v.snippet.tags || []).join(' ')));
+  if(!list.length) list = all.filter(v => !NOT_RECIPE.test(v.snippet.title));
+  // 일반 영상 우선, 부족하면 쇼츠로 채움
+  const longs = list.filter(v => !v._short), shorts = list.filter(v => v._short);
+  const rank = arr => arr.sort((a, b) => (b._hasRecipe - a._hasRecipe) || (views(b) - views(a)));
+  return rank(longs).concat(rank(shorts)).slice(0, 5);
 }
 
 let lastSearch = null; // { q, list }
 let currentView = 'search';
-const loadingSteps = ["유튜브에서 검색하는 중…","조회수 순으로 정렬하는 중…","레시피 있는지 살펴보는 중…"];
+const loadingSteps = ["유튜브에서 검색하는 중…","관련 없는 영상 거르는 중…","레시피 있는지 살펴보는 중…"];
 function showEmpty(html){
   $('result').classList.remove('show');
   const el = $('empty'); el.classList.add('show');
@@ -943,7 +957,7 @@ function renderTop5(){
   const el = $('result');
   $('empty').classList.remove('show');
   el.innerHTML = `
-    <div class="list-head"><h2>‘${escapeHtml(q)}’ TOP ${list.length}</h2><span>유튜브 조회수 순 · 먹방 제외</span></div>
+    <div class="list-head"><h2>‘${escapeHtml(q)}’ TOP ${list.length}</h2><span>레시피 있는 영상 우선 · 조회수 순</span></div>
     <p style="font-size:12.5px;color:var(--ink-muted);margin:0 0 4px;">원하는 영상을 고르면 재료와 조리 순서를 정리해서 바로 저장해요.</p>
     ${list.map((v, i) => {
       const p = v._prev, ok = p.ingredients.length >= 3;
@@ -952,7 +966,7 @@ function renderTop5(){
         <div class="vthumb" style="background-image:url('${v.snippet.thumbnails?.medium?.url || ''}')"></div>
         <div class="vbody">
           <div class="vtitle">${escapeHtml(v.snippet.title)}</div>
-          <div class="vsub">${escapeHtml(v.snippet.channelTitle)} · 조회수 ${fmtViews(v.statistics.viewCount)}회${rec[v.id] ? '<span class="tag">저장됨</span>' : ''}</div>
+          <div class="vsub">${escapeHtml(v.snippet.channelTitle)} · 조회수 ${fmtViews(v.statistics.viewCount)}회${v._short ? '<span class="tag red">쇼츠</span>' : ''}${rec[v.id] ? '<span class="tag">저장됨</span>' : ''}</div>
           <div class="vprev ${ok ? 'ok' : 'no'}">${ok ? `✓ 설명란 레시피 · 재료 ${p.ingredients.length}개${p.steps.length ? ' · 단계 ' + p.steps.length + '개' : ''}` : (getGeminiKey() ? '설명란에 레시피 없음 · 🎬 Gemini가 영상 보고 정리' : '설명란에 레시피 없음 · Gemini 키 있으면 영상 보고 정리')}</div>
         </div>
       </div>`; }).join('')}`;
