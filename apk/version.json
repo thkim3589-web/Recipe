@@ -1,6 +1,6 @@
 {
-  "versionCode": 2,
-  "versionName": "1.1",
+  "versionCode": 3,
+  "versionName": "1.2",
   "apkUrl": "https://github.com/thkim3589-web/Recipe/raw/main/apk/recipe.apk",
-  "notes": "· 백업 파일 저장·불러오기 지원\n· 요리 모드에서 화면이 꺼지지 않게 유지"
+  "notes": "· 요리 타이머가 다른 앱을 쓰는 중에도 알림으로 울려요\n· 레시피·장보기 목록을 카톡 등으로 보내기\n· 폰 뒤로가기 버튼으로 이전 화면 이동"
 }

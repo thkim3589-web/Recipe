@@ -1,11 +1,15 @@
 package com.thkim.recipe;
 
 import android.app.Activity;
+import android.app.AlarmManager;
 import android.app.AlertDialog;
+import android.app.PendingIntent;
+import android.app.NotificationManager;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.graphics.Color;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.WindowManager;
 import android.webkit.JavascriptInterface;
@@ -54,6 +58,40 @@ public class MainActivity extends Activity {
                 try { startActivityForResult(i, REQ_SAVE); } catch (Exception e) { notifySaved(false); }
             }});
         }
+        // 요리 타이머 예약 (앱 밖에서도 알림)
+        @JavascriptInterface
+        public void scheduleTimer(int sec, String label, String dish) {
+            if (Build.VERSION.SDK_INT >= 33 && checkSelfPermission("android.permission.POST_NOTIFICATIONS") != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                runOnUiThread(new Runnable() { public void run() {
+                    requestPermissions(new String[]{"android.permission.POST_NOTIFICATIONS"}, 5);
+                }});
+            }
+            AlarmManager am = (AlarmManager) getSystemService(ALARM_SERVICE);
+            long at = System.currentTimeMillis() + sec * 1000L;
+            PendingIntent pi = timerIntent(label, dish);
+            try {
+                if (Build.VERSION.SDK_INT >= 31 && !am.canScheduleExactAlarms()) am.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, at, pi);
+                else am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, at, pi);
+            } catch (Exception e) {
+                am.set(AlarmManager.RTC_WAKEUP, at, pi);
+            }
+        }
+        @JavascriptInterface
+        public void cancelTimer() {
+            AlarmManager am = (AlarmManager) getSystemService(ALARM_SERVICE);
+            am.cancel(timerIntent(null, null));
+            ((NotificationManager) getSystemService(NOTIFICATION_SERVICE)).cancel(7);
+        }
+        // 카톡 등으로 텍스트 공유
+        @JavascriptInterface
+        public void share(final String text) {
+            runOnUiThread(new Runnable() { public void run() {
+                Intent i = new Intent(Intent.ACTION_SEND);
+                i.setType("text/plain");
+                i.putExtra(Intent.EXTRA_TEXT, text);
+                try { startActivity(Intent.createChooser(i, "레시피 보내기")); } catch (Exception ignored) {}
+            }});
+        }
         @JavascriptInterface
         public void keepScreenOn(final boolean on) {
             runOnUiThread(new Runnable() { public void run() {
@@ -61,6 +99,13 @@ public class MainActivity extends Activity {
                 else getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
             }});
         }
+    }
+
+    PendingIntent timerIntent(String label, String dish) {
+        Intent i = new Intent(this, TimerReceiver.class);
+        if (label != null) i.putExtra("label", label);
+        if (dish != null) i.putExtra("dish", dish);
+        return PendingIntent.getBroadcast(this, 1, i, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
     }
 
     void notifySaved(boolean ok) {

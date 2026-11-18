@@ -11,11 +11,13 @@ rm -rf build && mkdir -p build/classes build/dex assets
 cp ../recipe-finder.html assets/index.html
 $BT/aapt2 compile --dir res -o build/res.zip
 $BT/aapt2 link -o build/base.apk -I $AJ --manifest AndroidManifest.xml -A assets build/res.zip --java build/gen
-javac -encoding UTF-8 -source 8 -target 8 -nowarn -bootclasspath $AJ -d build/classes build/gen/com/thkim/recipe/R.java src/com/thkim/recipe/MainActivity.java
+javac -encoding UTF-8 -source 8 -target 8 -nowarn -bootclasspath $AJ -d build/classes build/gen/com/thkim/recipe/R.java src/com/thkim/recipe/*.java
 (cd build/classes && jar cf ../classes.jar .)
 $BT/d8 --release --min-api 24 --lib $AJ --output build/dex build/classes.jar
 cp build/base.apk build/unsigned.apk && (cd build/dex && zip -q ../unsigned.apk classes.dex)
 $BT/zipalign -f 4 build/unsigned.apk build/aligned.apk
+rm -f ../apk/recipe.apk.idsig
 $BT/apksigner sign --ks "$KS" --ks-pass "pass:$KS_PASS" --out ../apk/recipe.apk build/aligned.apk
 rm -rf build assets
+rm -f ../apk/recipe.apk.idsig
 echo "완료: apk/recipe.apk"
