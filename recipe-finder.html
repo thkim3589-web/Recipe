@@ -418,6 +418,9 @@
     <h3 style="font-family:'Song Myung',serif;font-weight:400;font-size:20px;margin:0 0 6px;">유튜브 API 키 설정</h3>
     <p style="font-size:13px;color:var(--ink-muted);line-height:1.6;margin:0 0 16px;">이 기기의 브라우저에만 저장돼요. 다른 사람과 파일을 공유해도 키는 같이 전달되지 않아요.</p>
     <input id="apiKeyInput" type="password" placeholder="AIza… 로 시작하는 키" style="width:100%;padding:11px;border:1px solid var(--line);border-radius:2px;font-size:14px;background:var(--bg);color:var(--ink);margin-bottom:8px;" autocomplete="off">
+    <h3 style="font-family:'Song Myung',serif;font-weight:400;font-size:17px;margin:14px 0 6px;">Claude API 키 (자동 정리용)</h3>
+    <p style="font-size:12.5px;color:var(--ink-muted);line-height:1.6;margin:0 0 10px;">영상 설명·자막에서 재료와 조리 순서를 자동으로 뽑을 때 써요. console.anthropic.com에서 발급받을 수 있어요.</p>
+    <input id="claudeKeyInput" type="password" placeholder="sk-ant-… 로 시작하는 키" style="width:100%;padding:11px;border:1px solid var(--line);border-radius:2px;font-size:14px;background:var(--bg);color:var(--ink);margin-bottom:8px;" autocomplete="off">
     <label style="display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--ink-muted);margin-bottom:16px;">
       <input type="checkbox" id="showKeyToggle"> 입력한 키 표시
     </label>
@@ -504,12 +507,16 @@ const DB = {
 // 키는 파일에 저장하지 않고, 이 브라우저의 localStorage에서만 읽어옵니다.
 const YT_KEY_STORAGE = 'yt_api_key';
 function getApiKey(){ return localStorage.getItem(YT_KEY_STORAGE) || ''; }
+const CLAUDE_KEY_STORAGE = 'claude_api_key';
+function getClaudeKey(){ return localStorage.getItem(CLAUDE_KEY_STORAGE) || ''; }
 
 // ---- 설정창 ----
 const settingsOverlay = document.getElementById('settingsOverlay');
 const apiKeyInput = document.getElementById('apiKeyInput');
+const claudeKeyInput = document.getElementById('claudeKeyInput');
 function openSettings(){
   apiKeyInput.value = getApiKey();
+  claudeKeyInput.value = getClaudeKey();
   settingsOverlay.style.display = 'flex';
 }
 function closeSettings(){ settingsOverlay.style.display = 'none'; }
@@ -517,13 +524,59 @@ document.getElementById('settingsBtn').onclick = openSettings;
 document.getElementById('settingsCancel').onclick = closeSettings;
 document.getElementById('showKeyToggle').onchange = (e)=>{
   apiKeyInput.type = e.target.checked ? 'text' : 'password';
+  claudeKeyInput.type = e.target.checked ? 'text' : 'password';
 };
 document.getElementById('settingsSave').onclick = ()=>{
   const v = apiKeyInput.value.trim();
   if(v) localStorage.setItem(YT_KEY_STORAGE, v);
   else localStorage.removeItem(YT_KEY_STORAGE);
+  const c = claudeKeyInput.value.trim();
+  if(c) localStorage.setItem(CLAUDE_KEY_STORAGE, c);
+  else localStorage.removeItem(CLAUDE_KEY_STORAGE);
   closeSettings();
 };
+
+// ---- Claude API로 재료/조리순서 자동 정리 ----
+async function summarizeRecipe(dish, title, text){
+  const key = getClaudeKey();
+  if(!key){
+    const err = new Error('Claude API 키가 없어요. ⚙ 버튼에서 먼저 입력해주세요.');
+    err.noKey = true;
+    throw err;
+  }
+  const prompt = `아래는 유튜브 요리 영상 "${title}"의 설명과 자막이에요. 요리 이름: ${dish}
+
+이 텍스트에서 재료와 조리 순서를 뽑아 JSON으로만 답하세요. 다른 말은 쓰지 마세요.
+형식: {"ingredients":[["재료명","양"]],"steps":["조리 단계"],"tips":"팁 한두 문장 또는 빈 문자열"}
+규칙:
+- 텍스트에 실제로 나온 내용만 쓰세요. 없는 재료나 양을 지어내지 마세요. 양을 모르면 ""로 두세요.
+- 조리 단계는 짧고 명확한 한국어 문장으로, 순서대로 정리하세요. 자막의 군더더기 말은 빼세요.
+- 재료나 조리 순서를 찾을 수 없으면 빈 배열로 두세요.
+
+<text>
+${text.slice(0, 60000)}
+</text>`;
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      'x-api-key': key,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true'
+    },
+    body: JSON.stringify({
+      model: 'claude-haiku-5-5',
+      max_tokens: 2000,
+      messages: [{ role: 'user', content: prompt }]
+    })
+  });
+  const data = await res.json();
+  if(data.error) throw new Error(data.error.message || 'Claude API 오류');
+  const out = (data.content || []).map(b => b.text || '').join('');
+  const m = out.match(/\{[\s\S]*\}/);
+  if(!m) throw new Error('응답을 해석하지 못했어요. 다시 시도해주세요.');
+  return JSON.parse(m[0]);
+}
 settingsOverlay.addEventListener('click', (e)=>{ if(e.target === settingsOverlay) closeSettings(); });
 
 const chipsEl = document.getElementById('chips');
@@ -631,7 +684,16 @@ function renderVideo(q, video){
     </a>
 
     <h2 class="dish-name">${escapeHtml(q)}</h2>
-    <p class="dish-tagline">위 영상을 보면서 재료와 조리 순서를 정리해보세요. (아직 자동 요약은 지원하지 않아요)</p>
+    <p class="dish-tagline">자동 정리를 누르면 영상 설명과 자막에서 재료와 조리 순서를 뽑아드려요.</p>
+
+    <div class="section-label">자동 정리 <span class="count">Claude AI</span></div>
+    <details style="background:var(--card);border:1px solid var(--line);padding:10px 12px;font-size:13px;color:var(--ink-muted);line-height:1.6;">
+      <summary style="cursor:pointer;color:var(--ink);">자막도 함께 넣기 (선택, 더 정확해져요)</summary>
+      유튜브 앱/웹에서 영상 설명의 <b>‘더보기 → 스크립트 표시’</b>를 눌러 자막을 전체 복사한 뒤 아래에 붙여넣으세요. 비워두면 영상 설명만으로 정리해요.
+      <textarea id="transcriptInput" rows="4" placeholder="자막을 여기에 붙여넣기" style="margin-top:8px;width:100%;padding:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font-family:'Noto Sans KR',sans-serif;font-size:13px;border-radius:2px;resize:vertical;"></textarea>
+    </details>
+    <button id="autoBtn" style="margin-top:10px;width:100%;background:var(--green);color:var(--card);border:none;padding:13px;font-size:14.5px;font-weight:600;border-radius:2px;cursor:pointer;">✨ 재료·조리순서 자동 정리</button>
+    <div id="autoMsg" style="display:none;margin-top:8px;font-size:12.5px;line-height:1.6;"></div>
 
     <div class="section-label">분류</div>
     <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
@@ -652,9 +714,54 @@ function renderVideo(q, video){
     <button id="saveBtn" style="margin-top:16px;width:100%;background:var(--accent);color:var(--card);border:none;padding:13px;font-size:14.5px;font-weight:600;border-radius:2px;cursor:pointer;">이 브라우저에 저장</button>
     <div id="savedMsg" style="display:none;margin-top:10px;font-size:12.5px;color:var(--green);">저장했어요. '저장한 레시피' 탭에서 확인할 수 있어요.</div>
 
-    <div class="disclaimer">※ 영상 정보(제목·채널·조회수)는 유튜브 데이터 API에서 실시간으로 가져온 실제 데이터예요. 재료·조리법은 자동 추출이 아직 안 되어 직접 입력하는 방식이에요.</div>
+    <div id="tipsBox" class="tips" style="${saved && saved.tips ? '' : 'display:none;'}">${saved && saved.tips ? '<b>꿀팁 —</b> '+escapeHtml(saved.tips) : ''}</div>
+
+    <div class="disclaimer">※ 영상 정보(제목·채널·조회수)는 유튜브 데이터 API에서 실시간으로 가져와요. 자동 정리 결과는 AI가 영상 설명·자막을 요약한 것이라 틀릴 수 있으니, 저장 전에 한 번 확인하고 고쳐주세요.</div>
   `;
   resultEl.classList.add('show');
+
+  const description = video.snippet.description || '';
+  let currentTips = saved ? (saved.tips || '') : '';
+  document.getElementById('autoBtn').onclick = async ()=>{
+    const btn = document.getElementById('autoBtn');
+    const msg = document.getElementById('autoMsg');
+    const transcript = document.getElementById('transcriptInput').value.trim();
+    if(!description.trim() && !transcript){
+      msg.style.display='block'; msg.style.color='var(--accent)';
+      msg.textContent = '영상 설명이 비어 있어요. 자막을 붙여넣고 다시 눌러주세요.';
+      return;
+    }
+    const ingEl = document.getElementById('ingInput');
+    const stepEl = document.getElementById('stepInput');
+    if((ingEl.value.trim() || stepEl.value.trim()) && !confirm('입력해 둔 재료·조리순서를 자동 정리 결과로 바꿀까요?')) return;
+    btn.disabled = true; btn.textContent = '정리하는 중…';
+    msg.style.display='none';
+    try{
+      const text = `[영상 설명]\n${description}\n\n[자막]\n${transcript || '(없음)'}`;
+      const r = await summarizeRecipe(q, video.snippet.title, text);
+      const ings = (r.ingredients || []).map(x => Array.isArray(x) ? (x[0] + (x[1] ? ' ' + x[1] : '')) : String(x));
+      const steps = (r.steps || []).map(String);
+      if(!ings.length && !steps.length){
+        msg.style.display='block'; msg.style.color='var(--accent)';
+        msg.textContent = transcript ? '재료와 조리 순서를 찾지 못했어요.' : '영상 설명에 레시피가 없어요. 자막을 붙여넣고 다시 눌러주세요.';
+      } else {
+        ingEl.value = ings.join('\n');
+        stepEl.value = steps.join('\n');
+        currentTips = r.tips || '';
+        const tb = document.getElementById('tipsBox');
+        tb.style.display = currentTips ? '' : 'none';
+        tb.innerHTML = currentTips ? '<b>꿀팁 —</b> ' + escapeHtml(currentTips) : '';
+        msg.style.display='block'; msg.style.color='var(--green)';
+        msg.textContent = `재료 ${ings.length}개, 조리 단계 ${steps.length}개를 정리했어요. 확인 후 저장해주세요.`;
+      }
+    }catch(err){
+      msg.style.display='block'; msg.style.color='var(--accent)';
+      msg.textContent = '자동 정리 실패: ' + err.message;
+      if(err.noKey) openSettings();
+    }finally{
+      btn.disabled = false; btn.textContent = '✨ 재료·조리순서 자동 정리';
+    }
+  };
 
   document.getElementById('saveBtn').onclick = ()=>{
     const map = getSavedMap();
@@ -663,7 +770,8 @@ function renderVideo(q, video){
       steps: document.getElementById('stepInput').value,
       category: document.getElementById('categorySelect').value,
       favorite: document.getElementById('favToggle').checked,
-      video: { title: video.snippet.title, channelTitle: video.snippet.channelTitle, thumb, videoId: video.id, views: video.statistics.viewCount },
+      tips: currentTips,
+      video: { title: video.snippet.title, channelTitle: video.snippet.channelTitle, thumb, videoId: video.id, views: video.statistics.viewCount, description },
       savedAt: Date.now()
     };
     setSavedMap(map);
@@ -678,7 +786,7 @@ function renderSavedEntry(q, entry){
   document.getElementById('empty').classList.remove('show');
   const fakeVideo = {
     id: entry.video.videoId,
-    snippet: { title: entry.video.title, channelTitle: entry.video.channelTitle, thumbnails: { medium: { url: entry.video.thumb } } },
+    snippet: { title: entry.video.title, channelTitle: entry.video.channelTitle, description: entry.video.description || '', thumbnails: { medium: { url: entry.video.thumb } } },
     statistics: { viewCount: entry.video.views }
   };
   renderVideo(q, fakeVideo);
