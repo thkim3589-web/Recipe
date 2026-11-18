@@ -887,14 +887,14 @@ async function summarizeRecipe(dish, title, description, transcript, videoId){
 // ---- 유튜브 검색: 조회수 TOP 5 (먹방 등 제외) ----
 const NOT_RECIPE = /먹방|mukbang|asmr|eating\s?show|리액션|reaction|브이로그|vlog|챌린지|challenge|#shorts/i;
 function isoSec(d){ const m = String(d || '').match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/); return m ? (+m[1] || 0) * 3600 + (+m[2] || 0) * 60 + (+m[3] || 0) : 0; }
-async function ytSearch(q){
+async function ytSearch(q, pageToken){
   const key = getApiKey();
   if(!key){ const err = new Error('유튜브 API 키가 없어요. 오른쪽 위 ⚙ 버튼을 눌러 먼저 입력해주세요.'); err.noKey = true; throw err; }
   // 관련도 순으로 50개를 받아서 → 제목에 요리 이름이 들어간 것만 → 쇼츠·먹방 제외 → 레시피 있는 영상 우선, 조회수 순
-  const sRes = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(q + ' 레시피')}&order=relevance&type=video&maxResults=50&relevanceLanguage=ko&regionCode=KR&key=${key}`);
+  const sRes = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(q + ' 레시피')}&order=relevance&type=video&maxResults=50&relevanceLanguage=ko&regionCode=KR${pageToken ? '&pageToken=' + pageToken : ''}&key=${key}`);
   const sData = await sRes.json();
   if(sData.error) throw new Error(sData.error.message || 'API 오류');
-  if(!sData.items || !sData.items.length) return [];
+  if(!sData.items || !sData.items.length) return { list: [], next: null };
   const ids = sData.items.map(i => i.id.videoId).join(',');
   const vRes = await fetch(`https://www.googleapis.com/youtube/v3/videos?part=statistics,snippet,contentDetails&id=${ids}&key=${key}`);
   const vData = await vRes.json();
@@ -920,14 +920,14 @@ async function ytSearch(q){
     v._hasRecipe = v._prev.ingredients.length >= 3;
   });
   let list = all.filter(v => onTopic(v) && !NOT_RECIPE.test(v.snippet.title + ' ' + (v.snippet.tags || []).join(' ')));
-  if(!list.length) list = all.filter(v => !NOT_RECIPE.test(v.snippet.title));
+  if(!list.length && !pageToken) list = all.filter(v => !NOT_RECIPE.test(v.snippet.title));
   // 일반 영상 우선, 부족하면 쇼츠로 채움
   const longs = list.filter(v => !v._short), shorts = list.filter(v => v._short);
   const rank = arr => arr.sort((a, b) => (b._hasRecipe - a._hasRecipe) || (views(b) - views(a)));
   const out = rank(longs).concat(rank(shorts));
   // 정확히 맞는 영상이 먼저, 비슷한 영상은 뒤에
   out.sort((a, b) => (b._sim === 1) - (a._sim === 1));
-  return out.slice(0, 5);
+  return { list: out, next: sData.nextPageToken || null };
 }
 
 let lastSearch = null; // { q, list }
@@ -950,10 +950,10 @@ function runSearch(q){
   const loading = $('loading'); loading.classList.add('show');
   let i = 0; $('loadingStep').textContent = loadingSteps[0];
   const iv = setInterval(() => { i = (i + 1) % loadingSteps.length; $('loadingStep').textContent = loadingSteps[i]; }, 700);
-  ytSearch(q).then(list => {
+  ytSearch(q).then(({ list, next }) => {
     clearInterval(iv); loading.classList.remove('show');
     if(!list.length){ showEmpty(`‘${escapeHtml(q)}’ 영상을 찾지 못했어요. 다른 검색어로 시도해보세요.`); return; }
-    lastSearch = { q, list };
+    lastSearch = { q, list, next, shown: Math.min(5, list.length) };
     addChip(q);
     renderTop5();
   }).catch(err => {
@@ -964,14 +964,16 @@ function runSearch(q){
 }
 
 function renderTop5(){
-  const { q, list } = lastSearch;
+  const { q, list: full, shown, next } = lastSearch;
+  const list = full.slice(0, shown);
+  const canMore = full.length > shown || !!next;
   const rec = getRecipes();
   const el = $('result');
   $('empty').classList.remove('show');
   el.innerHTML = `
-    <div class="list-head"><h2>‘${escapeHtml(q)}’ TOP ${list.length}</h2><span>레시피 있는 영상 우선 · 조회수 순</span></div>
+    <div class="list-head"><h2>‘${escapeHtml(q)}’ ${list.length <= 5 ? 'TOP ' + list.length : list.length + '개'}</h2><span>레시피 있는 영상 우선 · 조회수 순</span></div>
     <p style="font-size:12.5px;color:var(--ink-muted);margin:0 0 4px;">원하는 영상을 고르면 재료와 조리 순서를 정리해서 바로 저장해요.</p>
-    ${list.length < 5 ? `<p style="font-size:12.5px;color:var(--accent);margin:0 0 4px;">‘${escapeHtml(q)}’ 제목의 레시피 영상이 ${list.length}개뿐이에요. 맞춤법이나 띄어쓰기를 확인하거나 더 일반적인 이름으로 검색해보세요.</p>` : ''}
+    ${list.length < 5 && !canMore ? `<p style="font-size:12.5px;color:var(--accent);margin:0 0 4px;">‘${escapeHtml(q)}’ 제목의 레시피 영상이 ${list.length}개뿐이에요. 맞춤법이나 띄어쓰기를 확인하거나 더 일반적인 이름으로 검색해보세요.</p>` : ''}
     ${list.map((v, i) => {
       const p = v._prev, ok = p.ingredients.length >= 3;
       return `<div class="vcard" data-i="${i}">
@@ -982,8 +984,27 @@ function renderTop5(){
           <div class="vsub">${escapeHtml(v.snippet.channelTitle)} · 조회수 ${fmtViews(v.statistics.viewCount)}회${v._short ? '<span class="tag red">쇼츠</span>' : ''}${rec[v.id] ? '<span class="tag">저장됨</span>' : ''}</div>
           <div class="vprev ${ok ? 'ok' : 'no'}">${ok ? `✓ 설명란 레시피 · 재료 ${p.ingredients.length}개${p.steps.length ? ' · 단계 ' + p.steps.length + '개' : ''}` : (getGeminiKey() ? '설명란에 레시피 없음 · 🎬 Gemini가 영상 보고 정리' : '설명란에 레시피 없음 · Gemini 키 있으면 영상 보고 정리')}</div>
         </div>
-      </div>`; }).join('')}`;
+      </div>`; }).join('')}
+    ${canMore ? `<button class="btn" id="moreBtn" style="width:100%;margin-top:12px;padding:13px;font-size:14px;">＋ 다음 5개 더 보기 (${shown + 1}~${shown + 5}위)</button>` : (shown > 5 ? `<p style="text-align:center;font-size:12.5px;color:var(--ink-muted);margin:14px 0;">더 이상 영상이 없어요</p>` : '')}`;
   el.classList.add('show');
+  if($('moreBtn')) $('moreBtn').onclick = async () => {
+    const btn = $('moreBtn');
+    if(lastSearch.list.length < lastSearch.shown + 5 && lastSearch.next){
+      btn.disabled = true; btn.textContent = '더 찾는 중…';
+      try{
+        let tries = 0;
+        while(lastSearch.list.length < lastSearch.shown + 5 && lastSearch.next && tries < 2){
+          const r = await ytSearch(lastSearch.q, lastSearch.next);
+          const have = new Set(lastSearch.list.map(v => v.id));
+          lastSearch.list = lastSearch.list.concat(r.list.filter(v => !have.has(v.id)));
+          lastSearch.next = r.next; tries++;
+        }
+      }catch(err){ toast('더 불러오지 못했어요: ' + err.message); }
+    }
+    lastSearch.shown = Math.min(lastSearch.shown + 5, lastSearch.list.length);
+    if(lastSearch.list.length <= lastSearch.shown && !lastSearch.next) lastSearch.next = null;
+    const y = window.scrollY; renderTop5(); window.scrollTo({ top: y });
+  };
   el.querySelectorAll('.vcard').forEach(c => c.onclick = () => {
     const v = list[+c.dataset.i];
     const saved = getRecipes()[v.id];
